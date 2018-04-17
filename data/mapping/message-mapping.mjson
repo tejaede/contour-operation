@@ -1,0 +1,24 @@
+{
+    "root": {
+        "prototype": "montage/data/service/expression-data-mapping",
+        "values": {
+            "rawDataPrimaryKeys":["id"],
+            "objectDescriptor": {"@": "MessageObjectDescriptor"},
+            "objectMapping": {
+                "rules": {
+                    "id": {"<->": "id"},
+                    "subject": {"<->": "subject"},
+                    "text": {"<->": "text"},
+                    "created": {"<->": "created"},
+                    "updated": {"<->": "updated"}
+                }
+            },
+            "requisitePropertyNames": [
+                "id", "subject", "text", "created", "updated"
+            ]
+        }
+    },
+    "MessageObjectDescriptor": {
+        "object": "data/descriptors/message.mjson"
+    }
+}

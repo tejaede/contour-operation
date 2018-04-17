@@ -1,0 +1,46 @@
+{
+    "root": {
+        "prototype": "montage/core/meta/module-object-descriptor",
+        "values": {
+            "name": "Person",
+            "propertyDescriptors": [
+                {"@": "id"},
+                {"@": "name"},
+                {"@": "updated"},
+                {"@": "created"}
+            ],
+            "exportName": "Person",
+            "module": {
+                "%": "logic/model/person-model"
+            }
+        }
+    },
+    "id": {
+        "prototype": "montage/core/meta/property-descriptor",
+        "values": {
+            "name": "id",
+            "valueType": "number"
+        }
+    },
+    "name": {
+        "prototype": "montage/core/meta/property-descriptor",
+        "values": {
+            "name": "name",
+            "valueType": "string"
+        }
+    },
+    "updated": {
+        "prototype": "montage/core/meta/property-descriptor",
+        "values": {
+            "name": "text",
+            "valueType": "string"
+        }
+    },
+    "created": {
+        "prototype": "montage/core/meta/property-descriptor",
+        "values": {
+            "name": "text",
+            "valueType": "string"
+        }
+    }
+}
