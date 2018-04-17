@@ -43,6 +43,7 @@ function getMainService() {
 function serialize(object) {
     return getMontageRequire().then(function (mr) {
         return mr.async('montage/core/serialization/serializer/montage-serializer').then(function (module) {
+            //console.log('kkk')
             return module.serialize(object, mr); 
         });
     });
@@ -58,25 +59,26 @@ function deserialize(data) {
 
 function createDataQueryFromParams(queryParam) {
     return getMontageRequire().then(function (mr) {
-        return mr.async("montage/data/service/data-selector").then(function (module) {
-            var DataSelector = module.DataSelector;
+        return mr.async("montage/data/model/data-query").then(function (module) {
+            var DataQuery = module.DataQuery;
             return mr.async("montage/core/criteria").then(function (module) {
                 var Criteria = module.Criteria;
-                return mr.async("logic/model/message-model").then(function (module) {
-                    console.log('ok')
+                return mr.async("data/descriptors/person.mjson").then(function (module) {
+                    
                     // A Default Query
-                    var dataType = module["Message"];
+                    var dataType = module.montageObject;
                     var dataExpression = "";
                     var dataParameters = queryParam;
 
                     var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
-                    var dataQuery  = DataSelector.withTypeAndCriteria(dataType, dataCriteria);
-                    //return dataQuery;
+                    var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
+                    
                     return serialize(dataQuery).then(function (queryJson) {
-                        console.log('createDataQueryFromParams (serialized)', queryJson);
+                        //console.log('createDataQueryFromParams (serialized)', queryJson);
                         return dataQuery;
                     }).catch(function (err) {
-                        console.log(err)
+                        console.log(err);
+                        throw err;
                     });
                 });
             });
@@ -86,11 +88,11 @@ function createDataQueryFromParams(queryParam) {
 
 function getDataOperationFromData(queryJson) {
     return getMontageRequire().then(function (mr) {
-        return mr.async("montage/data/service/data-selector").then(function (module) {
-            var DataSelector = module.DataSelector;
+        return mr.async("montage/data/model/data-query").then(function (module) {
+            var DataQuery = module.DataQuery;
             return mr.async("montage/core/criteria").then(function (module) {
                 var Criteria = module.Criteria;
-                console.log('getDataOperationFromData (serialized)', queryJson);
+                //console.log('getDataOperationFromData (serialized)', queryJson);
                 return deserialize(queryJson);
             });
         }); 
@@ -98,8 +100,8 @@ function getDataOperationFromData(queryJson) {
 }
 
 function getDataOperationFromRequest(request) {
-    var queryParam = request && (request.query.query || request.params.query);
-    console.log('getDataOperationFromRequest', queryParam);
+    var queryParam = {};
+    //console.log('getDataOperationFromRequest', queryParam);
     return queryParam ? 
         getDataOperationFromData(queryParam) : 
             createDataQueryFromParams(request);
@@ -107,14 +109,14 @@ function getDataOperationFromRequest(request) {
 
 function getDataOperationResponse(response, queryResult) {
     return serialize(queryResult).then(function (queryJson) {
-        console.log('getDataOperationResponse (serialized)', queryJson);
+        //console.log('getDataOperationResponse (serialized)', queryJson);
         return queryJson;
     });
 }
 
 exports.fetchData = function (req, res) {
-    return getDataOperationFromRequest(req).then(function (dataQuery) {
-        return getMainService().then(function (mainService) {
+    return getMainService().then(function (mainService) {
+        return getDataOperationFromRequest(req).then(function (dataQuery) {
             return mainService.fetchData(dataQuery).then(function (queryResult) {
                 return getDataOperationResponse(res, queryResult);
             });
@@ -123,8 +125,8 @@ exports.fetchData = function (req, res) {
 };
 
 exports.deleteDataObject = function (req, res) {
-    return getDataOperationFromRequest(req).then(function (dataObject) {
-        return getMainService().then(function (mainService) {
+    return getMainService().then(function (mainService) {
+        return getDataOperationFromRequest(req).then(function (dataObject) {
             return mainService.deleteDataObject(dataObject).then(function (result) {
                 return getDataOperationResponse(res, result);
             });
@@ -133,8 +135,8 @@ exports.deleteDataObject = function (req, res) {
 };
 
 exports.saveDataObject = function (req, res) {
-    return getDataOperationFromRequest(req).then(function (dataObject) {
-        return getMainService().then(function (mainService) {
+    return getMainService().then(function (mainService) {
+        return getDataOperationFromRequest(req).then(function (dataObject) {
             return mainService.saveDataObject(dataObject).then(function (result) {
                 return getDataOperationResponse(res, result);
             });
