@@ -23,6 +23,22 @@ var dataStore = {
         }));
     },
     set: function (key, value) {
+
+        // Update rawData
+        // this.rootService.createdDataObjects.has(object)
+        if (!value.id) {
+
+            AUTO_INCREMENT_ID++;
+            value.id = AUTO_INCREMENT_ID;
+            value.created = Date.now();
+
+            // WHY why ?
+            //Object.assign(object, rawData);
+
+        } else {
+            value.updated = Date.now();
+        }
+
         return Promise.resolve(STORE.set(key, value));
     },
     get: function (key) {
@@ -87,38 +103,18 @@ exports.MessageService = HttpService.specialize(/** @lends MessageService.protot
     // Create and update
     saveRawData: {
         value: function (rawData, object) {
-
-            // Update rawData
-            if (this.rootService.createdDataObjects.has(object)) {
-
-                AUTO_INCREMENT_ID++;
-                rawData.id = AUTO_INCREMENT_ID;
-                rawData.created = Date.now();
-
-                // WHY why ?
-                //Object.assign(object, rawData);
-
-            } else {
-                rawData.updated = Date.now();
-
-                // WHY why ?
-                //object.updated = rawData.updated;
-            }
-
+            var self = this;
             // Update store
             return dataStore.set(rawData.id, rawData).then(function () {
-                return Promise.resolve(rawData);                
+                return self._mapRawDataToObject(rawData, object);
             });
-
         }
     },
 
     // Delete
     deleteRawData: {
         value: function (rawData, object) {
-            return dataStore.delete(rawData.id).then(function () {
-                return Promise.resolve(rawData); 
-            });
+            return dataStore.delete(rawData.id);
         }
     }
 });
