@@ -15,7 +15,7 @@ describe('Message HTTP API', () => {
   describe('/GET message', () => {
       it('it should GET all the messages', (done) => {
         chai.request(APP_TEST_URL)
-            .get('/api/message')
+            .get('/api/data')
             .end((err, res) => {
                 expect(err).to.be.null;
                 expect(res).to.have.status(200);
@@ -40,7 +40,7 @@ describe('Message HTTP API', () => {
         var message = {
         }
         chai.request(APP_TEST_URL)
-            .post('/api/message')
+            .post('/api/data')
             .send(message)
             .end((err, res) => {
                 expect(err).to.be.null;
@@ -61,7 +61,7 @@ describe('Message HTTP API', () => {
         var message = {
         }
         chai.request(APP_TEST_URL)
-            .delete('/api/message')
+            .delete('/api/data')
             .send(message)
             .end((err, res) => {
                 expect(err).to.be.null;

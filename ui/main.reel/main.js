@@ -2,7 +2,7 @@
  * @module ui/main.reel
  */
 var Component = require("montage/ui/component").Component;
-var DataSelector = require("montage/data/service/data-selector").DataSelector;
+var DataQuery = require("montage/data/model/data-query").DataQuery;
 var Criteria = require("montage/core/criteria").Criteria;
 
 var mainService = require("data/main-client.mjson").montageObject;
@@ -37,31 +37,6 @@ exports.Main = Component.specialize(/** @lends Main# */ {
             var dataType = Message;
             var dataSubType = Person;
 
-            //mainService.fetchData(dataSubType).then(function (res) {
-            //    assert('fetchData:withType', res.length === 1, res);
-            //});
-
-            if (0) {
-
-                // myMsg from service with criteria
-                var dataExpression = "";
-                var dataParameters = {
-                    //id: myMsg.id
-                };
-                var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
-                var dataQuery  = DataSelector.withTypeAndCriteria(dataType, dataCriteria);
-                
-
-                var query = serialize(dataQuery, require);
-                console.log(query);
-
-                mainService.fetchData(dataQuery).then(function (res) {
-                    assert('fetchData:withType', res.length === 1, res);
-                });
-
-                return;
-            }
-
             mainService.fetchData(dataType).then(function (res) {
                 assert('fetchData:withType', res.length === 1, res[0]);
 
@@ -93,7 +68,7 @@ exports.Main = Component.specialize(/** @lends Main# */ {
                                     id: myMsg.id
                                 };
                                 var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
-                                var dataQuery  = DataSelector.withTypeAndCriteria(dataType, dataCriteria);
+                                var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
                                 
                                 mainService.fetchData(dataQuery).then(function (res) {
                                     assert('fetchData:withTypeAndCriteria', res.length === 0, res);

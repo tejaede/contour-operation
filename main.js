@@ -63,18 +63,21 @@ function createDataQueryFromParams(queryParam) {
             var DataQuery = module.DataQuery;
             return mr.async("montage/core/criteria").then(function (module) {
                 var Criteria = module.Criteria;
-                return mr.async("data/descriptors/person.mjson").then(function (module) {
+                return mr.async("data/descriptors/message.mjson").then(function (module) {
                     
                     // A Default Query
                     var dataType = module.montageObject;
                     var dataExpression = "";
-                    var dataParameters = queryParam;
+                    var dataParameters = {};
 
                     var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
                     var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
-                    
+             
+                    //return dataQuery;
+                
+                    // Re-Convert to serialized version
                     return serialize(dataQuery).then(function (queryJson) {
-                        //console.log('createDataQueryFromParams (serialized)', queryJson);
+                        console.log('createDataQueryFromParams (serialized)', queryJson);
                         return dataQuery;
                     }).catch(function (err) {
                         console.log(err);
@@ -86,33 +89,34 @@ function createDataQueryFromParams(queryParam) {
     });
 }
 
-function getDataOperationFromData(queryJson) {
+function getDataOperationFromData(data) {
     return getMontageRequire().then(function (mr) {
         return mr.async("montage/data/model/data-query").then(function (module) {
             var DataQuery = module.DataQuery;
             return mr.async("montage/core/criteria").then(function (module) {
                 var Criteria = module.Criteria;
-                //console.log('getDataOperationFromData (serialized)', queryJson);
-                return deserialize(queryJson);
+                return deserialize(data);
             });
         }); 
     });
 }
 
 function getDataOperationFromRequest(request) {
-    var queryParam = {};
-    //console.log('getDataOperationFromRequest', queryParam);
+    var queryParam = request && (request.query.query || request.params.query);
     return queryParam ? 
         getDataOperationFromData(queryParam) : 
             createDataQueryFromParams(request);
 }
-
 function getDataOperationResponse(response, queryResult) {
     return serialize(queryResult).then(function (queryJson) {
         //console.log('getDataOperationResponse (serialized)', queryJson);
         return queryJson;
     });
 }
+
+exports.getQuery = function (req, res) {
+
+};
 
 exports.fetchData = function (req, res) {
     return getMainService().then(function (mainService) {

@@ -14,39 +14,39 @@ var app = joey.log()
 
 
 // Load service controller
-var message = require('./middleware');
+var main = require('./main');
 
 // Route service controller
 app.route(function (router) {   
 
     // TODO PUT
-    // TODO message/:id
+    // TODO data/:id
 
-	router("api/message")
+	router("api/data")
 	    .method("GET")
 	    .contentType("application/json")
 	    .contentApp(function (request) {
-	        return message.fetchData(request).catch(function (err) {
+	        return main.fetchData(request).catch(function (err) {
 	            console.error(err, err.stack);
 	            throw err;
 	        });
 	    });
 
-	router("api/message")
+	router("api/data")
 	    .method("DELETE")
 	    .contentType("application/json")
 	    .contentApp(function (request) {
-	        return message.deleteDataObject(request).catch(function (err) {
+	        return main.deleteDataObject(request).catch(function (err) {
 	            console.error(err, err.stack);
 	            throw err;
 	        });
 	    });
 
-	router("api/message")
+	router("api/data")
 	    .method("POST") 
 	    .contentType("application/json")
 	    .contentApp(function (request) {
-	        return message.saveDataObject(request).catch(function (err) {
+	        return main.saveDataObject(request).catch(function (err) {
 	            console.error(err, err.stack);
 	            throw err;
 	        });
