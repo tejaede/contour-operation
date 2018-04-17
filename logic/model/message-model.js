@@ -37,15 +37,4 @@ exports.Message = Montage.specialize(/** @lends Message.prototype */ {
     updated: {
         value: undefined
     }
-}, {
-    /**
-     * The Montage Data type of features.
-     *
-     * @type {external:ObjectDescriptor}
-     */
-    objectPrototype: {
-        get: function () {
-            return exports.Message;
-        }
-    }
 });
