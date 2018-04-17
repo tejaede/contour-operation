@@ -6,8 +6,7 @@ var STORE = Map.from({
         "id": 42,
         "subject": "You've got mail",
         "text": "Hello World!",
-        "updated": void 0,
-        "created": Date.now()
+        "create": Date.now()
     }
 });
 
@@ -22,7 +21,7 @@ var dataStore = {
             return rawDataEntry[prop] === value;
         }));
     },
-    set: function (key, value) {
+    save: function (value) {
 
         // Update rawData
         // this.rootService.createdDataObjects.has(object)
@@ -39,7 +38,9 @@ var dataStore = {
             value.updated = Date.now();
         }
 
-        return Promise.resolve(STORE.set(key, value));
+        return Promise.resolve(STORE.set(value.id, value)).then(function () {
+            return value;
+        });
     },
     get: function (key) {
         return Promise.resolve(STORE.get(key));  
@@ -66,12 +67,8 @@ exports.MessageService = HttpService.specialize(/** @lends MessageService.protot
     types: {
         value: [Message]
     },
-
-    MessageMapping: {
-        value: null
-    },
     */
-    
+
     //==========================================================================
     // Entry points
     //==========================================================================
@@ -83,8 +80,6 @@ exports.MessageService = HttpService.specialize(/** @lends MessageService.protot
                 query = stream.query,
                 criteria = query.criteria,
                 parameters = criteria.parameters;
-
-            //console.log('fetchRawData', parameters);
 
             if (parameters && parameters.id) {
                 return dataStore.filterBy('id', parameters.id).then(function (rawData) {
@@ -105,7 +100,7 @@ exports.MessageService = HttpService.specialize(/** @lends MessageService.protot
         value: function (rawData, object) {
             var self = this;
             // Update store
-            return dataStore.set(rawData.id, rawData).then(function () {
+            return dataStore.save(rawData).then(function (rawData) {
                 return self._mapRawDataToObject(rawData, object);
             });
         }
@@ -114,7 +109,9 @@ exports.MessageService = HttpService.specialize(/** @lends MessageService.protot
     // Delete
     deleteRawData: {
         value: function (rawData, object) {
-            return dataStore.delete(rawData.id);
+            return dataStore.delete(rawData.id).then(function () {
+                return Promise.resolve(rawData); 
+            });
         }
     }
 });
