@@ -10,12 +10,14 @@ var program = require('commander');
 program
   .version('0.1.0') // TODO use package versiob
   .option('-s, --start [topic]', 'start consumer for given topic', 'topic1')
+  .option('-u, --url [url]', 'url with port (e.g localhost:2181)  ', 'localhost:2181')
   .option('-k, --key [key]', 'key', 'keyed')
   .option('-m, --message [message]', 'message', 'a keyed message')
   .option('-a, --attributes [attributes]', 'attributes', 0)
   .option('-p, --partition [partition]', 'partition', 0)
   .parse(process.argv);
 
+var url = program.url;
 var topic = program.start;
 var partition = program.partition;
 var attributes = program.attributes;
@@ -24,7 +26,7 @@ var key = program.key;
 var message = program.message;
 var keyedMessage = new KeyedMessage(key, message);
 
-var client = new Client('localhost:2181');
+var client = new Client(url);
 var producer = new Producer(client, { 
 	requireAcks: 1 
 });
