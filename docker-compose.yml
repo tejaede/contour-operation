@@ -10,6 +10,9 @@ services:
     # Exposed port
     ports:
       - "8080:8080"
+    networks:
+      - frontend
+      - backend
     build:
       context: ./
     volumes:
@@ -21,6 +24,8 @@ services:
     # Exposed port
     ports:
       - "2181:2181"
+    networks:
+      - backend
 
   kafka-service:
     container_name: kafka-service
@@ -29,8 +34,10 @@ services:
     ports:
       - "9092:9092"
       - "9093:9093"
+    networks:
+      - backend
     depends_on:
-      - zookeeper
+      - zookeeper-service
     environment:
       KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_ADVERTISED_HOST_NAME}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -55,3 +62,12 @@ services:
       - backend
     environment:
       POSTGRES_PASSWORD: psqlpass
+
+# Data volumes
+volumes:
+  db:
+
+# Default network
+networks:
+  frontend:
+  backend:
