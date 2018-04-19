@@ -4,12 +4,32 @@ var kafka = require('kafka-node');
 var Consumer = kafka.Consumer;
 var Offset = kafka.Offset;
 var Client = kafka.Client;
-var argv = require('optimist').argv;
-var topic = argv.topic || 'topic1';
+
+var program = require('commander');
+ 
+program
+  .version('0.1.0') // TODO use package versiob
+  .option('-s, --start [topic]', 'start consumer for given topic', 'topic1')
+  .option('-p, --partition [partition]', 'partition', 0)
+  .parse(process.argv);
+
+var topic = program.start;
+var partition = 0;
+
+var topics = [{ 
+	topic: topic, 
+	partition: 1 
+}, { 
+	topic: topic, 
+	partition: 0 
+}];
 
 var client = new Client('localhost:2181');
-var topics = [{ topic: topic, partition: 1 }, { topic: topic, partition: 0 }];
-var options = { autoCommit: false, fetchMaxWaitMs: 1000, fetchMaxBytes: 1024 * 1024 };
+var options = { 
+  autoCommit: false, 
+  fetchMaxWaitMs: 1000, 
+  fetchMaxBytes: 1024 * 1024 
+};
 
 var consumer = new Consumer(client, topics, options);
 var offset = new Offset(client);
