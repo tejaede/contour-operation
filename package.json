@@ -67,7 +67,7 @@
     "start:stack": "docker stack deploy -c docker-compose.yml 'message-stack'",
     "stop:stack": "docker stack rm 'message-stack'",
     "stop:swarm": "docker swarm leave --force",
-    "build": "npm run build:docker",
+    "build": "npm run build:compose",
     "build:docker": "docker build . -t message:develop-SNAPSHOT",
     "build:compose": "docker-compose build",
     "start:compose": "./start-docker.sh",
