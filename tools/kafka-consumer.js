@@ -1,4 +1,4 @@
-'use strict';
+/* jshint node: true */
 
 var kafka = require('kafka-node');
 var HighLevelConsumer = kafka.HighLevelConsumer;
@@ -39,9 +39,7 @@ consumer.on('error', function (err) {
   console.log('error', err);
 });
 
-/*
-* If consumer get `offsetOutOfRange` event, fetch data from the smallest(oldest) offset
-*/
+// If consumer get `offsetOutOfRange` event, fetch data from the smallest(oldest) offset
 consumer.on('offsetOutOfRange', function (topic) {
   topic.maxNum = 2;
   offset.fetch([topic], function (err, offsets) {

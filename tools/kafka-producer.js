@@ -1,4 +1,4 @@
-'use strict';
+/* jshint node: true */
 
 var kafka = require('kafka-node');
 var Producer = kafka.Producer;

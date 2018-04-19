@@ -38,7 +38,7 @@ describe('Message HTTP API', () => {
   describe('/POST message', () => {
       it('it should not POST a message without pages field', (done) => {
         var message = {
-        }
+        };
         chai.request(APP_TEST_URL)
             .post('/api/data')
             .send(message)
@@ -59,7 +59,7 @@ describe('Message HTTP API', () => {
   describe('/DELETE message', () => {
       it('it should not DELETE a message without pages field', (done) => {
         var message = {
-        }
+        };
         chai.request(APP_TEST_URL)
             .delete('/api/data')
             .send(message)
