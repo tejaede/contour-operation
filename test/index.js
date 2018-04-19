@@ -14,3 +14,4 @@ global.io = io;
 
 require('./spec/message-service-spec');
 require('./spec/message-service-ws-spec');
+require('./spec/kafka-node-spec.js');

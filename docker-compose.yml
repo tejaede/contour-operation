@@ -40,7 +40,7 @@ services:
       - zookeeper-service
     environment:
       KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_ADVERTISED_HOST_NAME}
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-service:2181
       KAFKA_LISTENERS: "PLAINTEXT://:9092,SSL://:9093"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${KAFKA_ADVERTISED_HOST_NAME}:9092,SSL://${KAFKA_ADVERTISED_HOST_NAME}:9093"
       KAFKA_SSL_KEYSTORE_LOCATION: "/var/private/ssl/certs/server.keystore.jks"
