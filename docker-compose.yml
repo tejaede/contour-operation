@@ -3,7 +3,7 @@ version: "3.1"
 services:
   message-service:
     container_name: message-service
-    depends_on:
+    links:
       - "db-service"
       - "zookeeper-service"
       - "kafka-service"
@@ -31,13 +31,13 @@ services:
     container_name: kafka-service
     image: wurstmeister/kafka:latest
     # Exposed port
+    networks:
+      - backend
     ports:
       - "9092:9092"
       - "9093:9093"
-    networks:
-      - backend
-    depends_on:
-      - zookeeper-service
+    links:
+      - zookeeper-service:zk
     environment:
       KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_ADVERTISED_HOST_NAME}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-service:2181

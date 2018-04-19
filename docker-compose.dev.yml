@@ -25,6 +25,12 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:psqlpass@db:5432
 
+  kafka-service:
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.1.7
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,SSL://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://192.168.1.7:9092,SSL://192.168.1.7:9093"
+
   kafka-manager-dev:
     container_name: kafka-manager-dev
     image: sheepkiller/kafka-manager
@@ -36,5 +42,5 @@ services:
     links:
       - zookeeper-service:zk
     environment:
-      ZK_HOSTS: "zookeeper-service:2181"
-      APPLICATION_SECRET: letmein
+      ZK_HOSTS: "zk:2181"
+      #APPLICATION_SECRET: letmein

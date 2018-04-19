@@ -18,4 +18,4 @@ COPY . .
 
 EXPOSE 8080/tcp
 
-CMD [ "npm", "start" ]
+CMD [ "node", "." ]

@@ -15,6 +15,7 @@ if [ -z "$TRAVIS" ]; then
 
     DOCKER_VM_IP=${DOCKER_VM_IP:-127.0.0.1}
     export KAFKA_ADVERTISED_HOST_NAME=$DOCKER_VM_IP
+    echo "$KAFKA_ADVERTISED_HOST_NAME"
     docker-compose down
 
     if [ -z "$KAFKA_VERSION" ]; then

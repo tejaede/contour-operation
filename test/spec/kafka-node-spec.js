@@ -19,7 +19,7 @@ describe('Client', function () {
   var client = null;
 
   describe('#handleReceivedData', function () {
-    let socket;
+    var socket;
 
     beforeEach(function () {
       socket = {
@@ -318,7 +318,7 @@ describe('Client', function () {
         clock.tick(500);
         zk.emit('brokersChanged', brokers);
 
-        clock.tick(500); // let reconnectBroker run
+        clock.tick(500); // var reconnectBroker run
 
         client.brokers.should.not.have.property(broker1001);
         sinon.assert.called(closeBrokersSpy);
