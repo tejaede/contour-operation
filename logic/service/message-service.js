@@ -6,7 +6,7 @@ var STORE = Map.from({
         "id": 42,
         "subject": "You've got mail",
         "text": "Hello World!",
-        "create": Date.now()
+        "created": Date.now()
     }
 });
 
@@ -24,16 +24,10 @@ var dataStore = {
     save: function (value) {
 
         // Update rawData
-        // this.rootService.createdDataObjects.has(object)
         if (!value.id) {
-
             AUTO_INCREMENT_ID++;
             value.id = AUTO_INCREMENT_ID;
             value.created = Date.now();
-
-            // WHY why ?
-            //Object.assign(object, rawData);
-
         } else {
             value.updated = Date.now();
         }
@@ -109,9 +103,7 @@ exports.MessageService = HttpService.specialize(/** @lends MessageService.protot
     // Delete
     deleteRawData: {
         value: function (rawData, object) {
-            return dataStore.delete(rawData.id).then(function () {
-                return Promise.resolve(rawData); 
-            });
+            return dataStore.delete(rawData.id);
         }
     }
 });
