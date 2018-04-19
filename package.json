@@ -48,6 +48,7 @@
   "scripts": {
     "lint": "jshint .",
     "start": "npm run start:docker",
+    "stop": "npm run stop:docker",
     "pretest": "",
     "test": "npm run start:test && npm run test:nsp",
     "start:test": "./run-tests.sh",
