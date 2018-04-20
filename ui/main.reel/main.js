@@ -10,6 +10,7 @@ var Message = require("data/descriptors/message.mjson").montageObject;
 var Person = require("data/descriptors/person.mjson").montageObject;
 
 var serialize = require("montage/core/serialization/serializer/montage-serializer").serialize;
+var deserialize = require('montage/core/serialization/deserializer/montage-deserializer').deserialize;
 
 
 function assert(msg, assertion, debug) {
@@ -38,7 +39,17 @@ exports.Main = Component.specialize(/** @lends Main# */ {
             var dataParameters = {};
             var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
             var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
-  
+
+
+            // Test via serialize then deserialize
+            // TODO Cause Can't fetch data of unknown type - undefined/undefined
+            // Comment to bypass this
+            // DEBUG
+            var queryMjson = serialize(dataQuery, require);
+            dataQuery = deserialize(queryMjson, require);
+            console.log(queryMjson);
+            // DEBUG
+
             mainService.fetchData(dataQuery).then(function (res) {
                 assert('fetchData:withTypeAndCriteria', res.length === 1, res);
 
