@@ -46,67 +46,70 @@ exports.Main = Component.specialize(/** @lends Main# */ {
             // Comment to bypass this
             // DEBUG
             var queryMjson = serialize(dataQuery, require);
-            dataQuery = deserialize(queryMjson, require);
+            // dataQuery = deserialize(queryMjson, require);
             console.log(queryMjson);
             // DEBUG
+            deserialize(queryMjson, require).then(function (dataQuery) {
 
-            mainService.fetchData(dataQuery).then(function (res) {
-                assert('fetchData:withTypeAndCriteria', res.length === 1, res);
+                mainService.fetchData(dataQuery).then(function (res) {
+                    assert('fetchData:withTypeAndCriteria', res.length === 1, res);
 
-                mainService.fetchData(dataType).then(function (res) {
-                    assert('fetchData:withType', res.length === 1, res[0]);
+                    mainService.fetchData(dataType).then(function (res) {
+                        assert('fetchData:withType', res.length === 1, res[0]);
 
-                    // TODO
-                    // Remote support READ only for now.
-                    return;
+                        // TODO
+                        // Remote support READ only for now.
+                        return;
 
-                    // Create reply
-                    var myMsg = mainService.createDataObject(dataType);
-                    myMsg.subject = "RE: You've got mail";
-                    mainService.saveDataObject(myMsg).then(function () {
-
-                        assert('saveDataObject.created', typeof myMsg.created !== 'undefined', myMsg);
-                        assert('saveDataObject.updated', typeof myMsg.updated === 'undefined', myMsg);
-                        myMsg.text = "Add missing text";
-
-                        // myMsg is updated
+                        // Create reply
+                        var myMsg = mainService.createDataObject(dataType);
+                        myMsg.subject = "RE: You've got mail";
                         mainService.saveDataObject(myMsg).then(function () {
-                            assert('saveDataObject.text', typeof myMsg.text !== 'undefined', myMsg);
-                            assert('saveDataObject.updated', typeof myMsg.updated !== 'undefined', myMsg);
 
-                            // myMsg from service
-                            mainService.fetchData(dataType).then(function (res) {
-                            
-                                assert('fetchData', res.length == 2, res);
+                            assert('saveDataObject.created', typeof myMsg.created !== 'undefined', myMsg);
+                            assert('saveDataObject.updated', typeof myMsg.updated === 'undefined', myMsg);
+                            myMsg.text = "Add missing text";
 
-                                // myMsg is deleted
-                                mainService.deleteDataObject(myMsg).then(function () {
-                                    
-                                    // myMsg from service with criteria
-                                    var dataExpression = "";
-                                    var dataParameters = {
-                                        id: myMsg.id
-                                    };
-                                    var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
-                                    var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
+                            // myMsg is updated
+                            mainService.saveDataObject(myMsg).then(function () {
+                                assert('saveDataObject.text', typeof myMsg.text !== 'undefined', myMsg);
+                                assert('saveDataObject.updated', typeof myMsg.updated !== 'undefined', myMsg);
 
-                                    var query = serialize(dataQuery, require);
-                                    console.log(query);
-                                    
-                                    mainService.fetchData(dataQuery).then(function (res) {
-                                        assert('fetchData:withTypeAndCriteria', res.length === 0, res);
+                                // myMsg from service
+                                mainService.fetchData(dataType).then(function (res) {
+                                
+                                    assert('fetchData', res.length == 2, res);
 
-                                        // myMsg from service
-                                        mainService.fetchData(dataType).then(function (res) {
-                                            assert('fetchData:withType', res.length === 1, res);
+                                    // myMsg is deleted
+                                    mainService.deleteDataObject(myMsg).then(function () {
+                                        
+                                        // myMsg from service with criteria
+                                        var dataExpression = "";
+                                        var dataParameters = {
+                                            id: myMsg.id
+                                        };
+                                        var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
+                                        var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
+
+                                        var query = serialize(dataQuery, require);
+                                        console.log(query);
+                                        
+                                        mainService.fetchData(dataQuery).then(function (res) {
+                                            assert('fetchData:withTypeAndCriteria', res.length === 0, res);
+
+                                            // myMsg from service
+                                            mainService.fetchData(dataType).then(function (res) {
+                                                assert('fetchData:withType', res.length === 1, res);
+                                            });
                                         });
                                     });
                                 });
-                            });
+                            }); 
                         }); 
-                    }); 
-                });
-            }); 
+                    });
+                }); 
+
+            });
         }
     }
 });
