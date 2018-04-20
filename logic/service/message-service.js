@@ -75,6 +75,8 @@ exports.MessageService = HttpService.specialize(/** @lends MessageService.protot
                 criteria = query.criteria,
                 parameters = criteria.parameters;
 
+            console.log('MessageService.fetchRawData', parameters, criteria);
+
             if (parameters && parameters.id) {
                 return dataStore.filterBy('id', parameters.id).then(function (rawData) {
                     self.addRawData(stream, rawData);

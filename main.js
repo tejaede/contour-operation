@@ -73,8 +73,6 @@ function createDataQueryFromParams(queryParam) {
                     var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
                     var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
              
-                    //return dataQuery;
-                
                     // Re-Convert to serialized version
                     return serialize(dataQuery).then(function (queryJson) {
                         console.log('createDataQueryFromParams (serialized)', queryJson);
@@ -121,6 +119,7 @@ exports.getQuery = function (req, res) {
 exports.fetchData = function (req, res) {
     return getMainService().then(function (mainService) {
         return getDataOperationFromRequest(req).then(function (dataQuery) {
+            console.log('mainService.fetchData', dataQuery);
             return mainService.fetchData(dataQuery).then(function (queryResult) {
                 return getDataOperationResponse(res, queryResult);
             });
