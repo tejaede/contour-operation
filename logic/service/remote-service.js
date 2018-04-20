@@ -55,10 +55,11 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
                 type = stream.query.type,
                 query = stream.query;
 
-            var url = '/api/message';
+            var url = '/api/data';
 
             return self._getQuery(criteria, type, query).then(function (body) {
-                return self.fetchHttpRawData(url, null, encodeURIComponent(body), false).then(function (data) {
+                url += '?query=' + encodeURIComponent(body);
+                return self.fetchHttpRawData(url, null, null, false).then(function (data) {
                     if (data) {
                         self.addRawData(stream, [data], criteria);
                         self.rawDataDone(stream);
