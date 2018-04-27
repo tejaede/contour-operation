@@ -100,7 +100,8 @@ function getDataOperationFromData(data) {
 }
 
 function getDataOperationFromRequest(request) {
-    var queryParam = request && (request.query.query || request.params.query);
+    console.log(request.body)
+    var queryParam = request && (request.query.query || request.body.data);
     return queryParam ? 
         getDataOperationFromData(queryParam) : 
             createDataQueryFromParams(request);
@@ -130,8 +131,9 @@ exports.fetchData = function (req, res) {
 exports.deleteDataObject = function (req, res) {
     return getMainService().then(function (mainService) {
         return getDataOperationFromRequest(req).then(function (dataObject) {
+            console.log('mainService.deleteDataObject', dataObject);
             return mainService.deleteDataObject(dataObject).then(function (result) {
-                return getDataOperationResponse(res, result);
+                return getDataOperationResponse(res, dataObject);
             });
         });
     });
@@ -140,8 +142,9 @@ exports.deleteDataObject = function (req, res) {
 exports.saveDataObject = function (req, res) {
     return getMainService().then(function (mainService) {
         return getDataOperationFromRequest(req).then(function (dataObject) {
+            console.log('mainService.saveDataObject', dataObject);
             return mainService.saveDataObject(dataObject).then(function (result) {
-                return getDataOperationResponse(res, result);
+                return getDataOperationResponse(res, dataObject);
             });
         });
     });

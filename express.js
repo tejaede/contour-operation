@@ -15,15 +15,9 @@ if(process.env.NODE_ENV !== 'test') {
     app.use(morgan('combined')); //'combined' outputs the Apache style LOGs
 }
 
-//parse application/json and look for raw text                                        
-app.use(bodyParser.json());                                     
-app.use(bodyParser.urlencoded({
-    extended: true
-}));               
-app.use(bodyParser.text());                                    
-app.use(bodyParser.json({ 
-    type: 'application/json'
-}));  
+//parse application/json and look for raw text
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodie
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -60,12 +54,8 @@ app.route("/api/data")
           resultToHttpResponse(res, 'saveDataObject', result);
         }, next);
     })
-    .put(function (req, res, next) {
-        main.saveDataObject(req, res).then(function (result) {
-          resultToHttpResponse(res, 'saveDataObject', result);
-        }, next);
-    })
-    .delete(function (req, res, next) {
+app.route("/api/data/delete")
+    .post(function (req, res, next) {
         main.deleteDataObject(req, res).then(function (result) {
           resultToHttpResponse(res, 'deleteDataObject', result);
         }, next);

@@ -45,9 +45,9 @@ exports.Main = Component.specialize(/** @lends Main# */ {
             // TODO Cause Can't fetch data of unknown type - undefined/undefined
             // Comment to bypass this
             // DEBUG
-            var queryMjson = serialize(dataQuery, require);
-            dataQuery = deserialize(queryMjson, require);
-            console.log(queryMjson);
+            //var queryMjson = serialize(dataQuery, require);
+            //dataQuery = deserialize(queryMjson, require);
+            //console.log(queryMjson);
             // DEBUG
 
             mainService.fetchData(dataQuery).then(function (res) {
@@ -58,7 +58,7 @@ exports.Main = Component.specialize(/** @lends Main# */ {
 
                     // TODO
                     // Remote support READ only for now.
-                    return;
+                    //return;
 
                     // Create reply
                     var myMsg = mainService.createDataObject(dataType);
@@ -90,8 +90,8 @@ exports.Main = Component.specialize(/** @lends Main# */ {
                                     var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
                                     var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
 
-                                    var query = serialize(dataQuery, require);
-                                    console.log(query);
+                                    //var query = serialize(dataQuery, require);
+                                    //console.log(query);
                                     
                                     mainService.fetchData(dataQuery).then(function (res) {
                                         assert('fetchData:withTypeAndCriteria', res.length === 0, res);

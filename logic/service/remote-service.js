@@ -25,20 +25,23 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
     },
     */
 
-    _getQuery: {
-        value: function (criteria, type, selector) {
+    _serialize: {
+        value: function (dataObject) {
             
-            var that = this,
-                dataQueryJson = serialize(selector, require);
-            // Debug serialize
-            //console.log(dataQueryJson);
-            //return Promise.resolve(encodeURIComponent(dataQueryJson));
-            // Test deserialize
-            console.log(dataQueryJson);
+            var self = this,
+                objectJSON = serialize(dataObject, require);
+            return self._deserialize(objectJSON).then(function () {
+                //console.log('_serialize', objectJSON, dataObject);
+                return objectJSON;
+            });
+        }
+    },
 
-            return deserialize(dataQueryJson, require).then(function (dataQuery) {
-                //console.log(dataQuery);
-                return dataQueryJson;
+    _deserialize: {
+        value: function (objectJSON) {
+            return deserialize(objectJSON, require).then(function (dataObject) {
+                //console.log('_deserialize', objectJSON, dataObject);
+                return dataObject;
             });
         }
     },
@@ -51,17 +54,15 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
     fetchRawData: {
         value: function (stream) {
             var self = this,
-                criteria = stream.query.criteria,
-                type = stream.query.type,
-                query = stream.query;
+                query = stream.query,
+                url = '/api/data';
 
-            var url = '/api/data';
-
-            return self._getQuery(criteria, type, query).then(function (body) {
-                url += '?query=' + encodeURIComponent(body);
+            return self._serialize(query).then(function (queryJSON) {
+                //console.log('fetchRawData', queryJSON);
+                url += '?query=' + encodeURIComponent(queryJSON);
                 return self.fetchHttpRawData(url, null, null, false).then(function (data) {
                     if (data) {
-                        self.addRawData(stream, [data], criteria);
+                        self.addRawData(stream, [data]);
                         self.rawDataDone(stream);
                     }
                 }); 
@@ -72,16 +73,55 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
     // Create and update
     saveRawData: {
         value: function (rawData, object) {
+            var self = this,
+                url = '/api/data';
 
             // TODO POST/PUT
-            // this.rootService.createdDataObjects.has(object)
+            var queryObject = Object.create(object);
+            self._mapRawDataToObject(rawData, queryObject);
+
+            return self._serialize(queryObject).then(function (queryJSON) {
+                //console.log('saveRawData', queryJSON);
+
+                var headers = {
+                        "Content-Type": "application/json"
+                    },
+                    body = JSON.stringify({
+                        data: queryJSON
+                    });
+
+                return self.fetchHttpRawData(url, headers, body, false).then(function (remoteObjectJSON) {
+                    return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
+                        return self._mapRawDataToObject(remoteObject, object);
+                    });
+                });
+            }); 
         }
     },
 
     // Delete
     deleteRawData: {
         value: function (rawData, object) {
+            var self = this,
+                url = '/api/data/delete';
+
             // TODO DELETE
+            return self._serialize(object).then(function (queryJSON) {
+                console.log('deleteRawData', queryJSON);
+
+                var headers = {
+                        "Content-Type": "application/json"
+                    },
+                    body = JSON.stringify({
+                        data: queryJSON
+                    });
+
+                return self.fetchHttpRawData(url, headers, body, false).then(function (remoteObjectJSON) {
+                    return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
+                        return self._mapRawDataToObject(remoteObject, object);
+                    });
+                });
+            }); 
         }
     }
 });

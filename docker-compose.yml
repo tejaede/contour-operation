@@ -16,7 +16,7 @@ services:
     build:
       context: ./
     volumes:
-      - ./ui:/usr/src/app/ui/:ro
+      - ./:/usr/src/app/:ro
 
   zookeeper-service:
     container_name: zookeeper-service

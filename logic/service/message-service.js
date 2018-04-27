@@ -31,7 +31,7 @@ var dataStore = {
         } else {
             value.updated = Date.now();
         }
-
+        
         return Promise.resolve(STORE.set(value.id, value)).then(function () {
             return value;
         });
@@ -74,8 +74,6 @@ exports.MessageService = HttpService.specialize(/** @lends MessageService.protot
                 query = stream.query,
                 criteria = query.criteria,
                 parameters = criteria.parameters;
-
-            console.log('MessageService.fetchRawData', parameters, criteria);
 
             if (parameters && parameters.id) {
                 return dataStore.filterBy('id', parameters.id).then(function (rawData) {
