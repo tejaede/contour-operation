@@ -1,5 +1,5 @@
 # Pull base image.
-FROM node:carbon
+FROM node:4
 
 # Create app directory
 WORKDIR /usr/src/app
