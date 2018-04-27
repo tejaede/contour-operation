@@ -60,11 +60,14 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
             return self._serialize(query).then(function (queryJSON) {
                 //console.log('fetchRawData', queryJSON);
                 url += '?query=' + encodeURIComponent(queryJSON);
-                return self.fetchHttpRawData(url, null, null, false).then(function (data) {
-                    if (data) {
-                        self.addRawData(stream, [data]);
-                        self.rawDataDone(stream);
-                    }
+                return self.fetchHttpRawData(url, null, null, false).then(function (remoteDataJson) {
+                    return self._deserialize(remoteDataJson).then(function (remoteData) {
+                        // TODO map deserialize result to RawData
+                        if (remoteData) {
+                            self.addRawData(stream, remoteData);
+                            self.rawDataDone(stream);
+                        }
+                    });
                 }); 
             }); 
         }
@@ -77,17 +80,17 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
                 url = '/api/data';
 
             // TODO POST/PUT
-            var queryObject = Object.create(object);
-            self._mapRawDataToObject(rawData, queryObject);
+            var dataObject = Object.create(object);
+            self._mapRawDataToObject(rawData, dataObject);
 
-            return self._serialize(queryObject).then(function (queryJSON) {
+            return self._serialize(dataObject).then(function (dataObjectJSON) {
                 //console.log('saveRawData', queryJSON);
 
                 var headers = {
                         "Content-Type": "application/json"
                     },
                     body = JSON.stringify({
-                        data: queryJSON
+                        data: dataObjectJSON
                     });
 
                 return self.fetchHttpRawData(url, headers, body, false).then(function (remoteObjectJSON) {
@@ -106,20 +109,19 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
                 url = '/api/data/delete';
 
             // TODO DELETE
-            return self._serialize(object).then(function (queryJSON) {
-                console.log('deleteRawData', queryJSON);
+            return self._serialize(object).then(function (dataObjectJSON) {
+                //console.log('deleteRawData', dataObjectJSON);
 
                 var headers = {
                         "Content-Type": "application/json"
                     },
                     body = JSON.stringify({
-                        data: queryJSON
+                        data: dataObjectJSON
                     });
 
                 return self.fetchHttpRawData(url, headers, body, false).then(function (remoteObjectJSON) {
-                    return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
-                        return self._mapRawDataToObject(remoteObject, object);
-                    });
+                    // Previous object
+                    //return self._deserialize(remoteObjectJSON);
                 });
             }); 
         }
