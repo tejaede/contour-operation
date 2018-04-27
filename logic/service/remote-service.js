@@ -62,11 +62,8 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
                 url += '?query=' + encodeURIComponent(queryJSON);
                 return self.fetchHttpRawData(url, null, null, false).then(function (remoteDataJson) {
                     return self._deserialize(remoteDataJson).then(function (remoteData) {
-                        // TODO map deserialize result to RawData
-                        if (remoteData) {
-                            self.addRawData(stream, remoteData);
-                            self.rawDataDone(stream);
-                        }
+                        stream.addData(remoteData);
+                        stream.dataDone();
                     });
                 }); 
             }); 
@@ -76,14 +73,11 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
     // Create and update
     saveRawData: {
         value: function (rawData, object) {
+
             var self = this,
                 url = '/api/data';
 
-            // TODO POST/PUT
-            var dataObject = Object.create(object);
-            self._mapRawDataToObject(rawData, dataObject);
-
-            return self._serialize(dataObject).then(function (dataObjectJSON) {
+            return self._serialize(object).then(function (dataObjectJSON) {
                 //console.log('saveRawData', queryJSON);
 
                 var headers = {
@@ -95,6 +89,8 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
 
                 return self.fetchHttpRawData(url, headers, body, false).then(function (remoteObjectJSON) {
                     return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
+                        //var objectDescriptor = self.objectDescriptorForObject(object);
+                        // TODO wait for objectDescriptor object to object update
                         return self._mapRawDataToObject(remoteObject, object);
                     });
                 });
