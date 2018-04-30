@@ -46,7 +46,6 @@ before_script:
   - export DOCKER_CLIENT_TIMEOUT=120
   - npm run build
 script:
-  - sleep 25
   - npm test
   - docker ps | grep -q message-service  
 after_failure:
