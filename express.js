@@ -1,30 +1,33 @@
+/* jshint node: true */
+'use strict';
+
+// [START main_body]
+process.title = "ring4-server";
+
 var express = require('express');  
-var app = express();  
-var server = require('http').createServer(app);  
-var socket = require('socket.io')(server);
+var http = require('http');  
+var io = require('socket.io');
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 
 const APP_PUBLIC_PATH = process.env.APP_PUBLIC_PATH || __dirname;
 const APP_HOSTNAME = process.env.APP_HOSTNAME || 'localhost';
 const APP_PORT = process.env.APP_PORT || '8080';
 
-//don't show the log when it is test
-if(process.env.NODE_ENV !== 'test') {
+var app = express();  
+var server = http.createServer(app)
+var socket = io(server)
+
+// don't show the log when it is test
+if (process.env.NODE_ENV !== 'test') {
     //use morgan to log at command line
-    app.use(morgan('combined')); //'combined' outputs the Apache style LOGs
+    app.use(morgan('combined')); // 'combined' outputs the Apache style LOGs
 }
 
-//parse application/json and look for raw text
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodie
-
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
+app.use(cors()); // support cross-origin
+app.use(bodyParser.json()); // support json encoded body
+app.use(bodyParser.urlencoded({extended: true})); // support encoded body
 
 // Serve statics
 app.use(express.static(APP_PUBLIC_PATH));
@@ -34,7 +37,7 @@ var main = require('./main');
 
 //
 // HTTP REST Routing 
-// /api/main GET|POST|PUT|DELETE
+// /api/data GET|POST|PUT|DELETE
 //
 
 function resultToHttpResponse(response, event, result) {
@@ -45,20 +48,26 @@ function resultToHttpResponse(response, event, result) {
 
 app.route("/api/data")
     .get(function (req, res, next) {
-        main.fetchData(req, res).then(function (result) {
+        // GET query
+        main.fetchData(req.query.query).then(function (result) {
           resultToHttpResponse(res, 'fetchData', result);
-        }, next);
-    })
+        }).catch(next);
+    });
+
+app.route("/api/data/save")
     .post(function (req, res, next) {
-        main.saveDataObject(req, res).then(function (result) {
+        // POST data
+        main.saveDataObject(req.body.data).then(function (result) {
           resultToHttpResponse(res, 'saveDataObject', result);
-        }, next);
-    })
+        }).catch(next);
+    });
+
 app.route("/api/data/delete")
     .post(function (req, res, next) {
-        main.deleteDataObject(req, res).then(function (result) {
+        // POST data
+        main.deleteDataObject(req.body.data).then(function (result) {
           resultToHttpResponse(res, 'deleteDataObject', result);
-        }, next);
+        }).catch(next);
     });
 
 
@@ -67,7 +76,8 @@ app.route("/api/data/delete")
 //
 
 var socketSubscriptions = new Map();
-function broadcastsDataOperation(event, data, clientSource) {
+function broadcastsResultSubscriptions(event, data, clientSource) {
+  console.log('[socket]', clientSource && clientSource.id, 'broadcastsResultSubscriptions', event);
   return Array.from(socketSubscriptions).filter(function (socketSubscription) {
     return clientSource && socketSubscription.id !== clientSource.id;
   }).map(function (socketSubscription) {
@@ -76,15 +86,23 @@ function broadcastsDataOperation(event, data, clientSource) {
 }
 
 function resultToSocketResponse(client, event, result) {
-
     // Preparse
     result = JSON.parse(result);
 
     client.emit(event, result);
-    broadcastsDataOperation(event, result, client);
+    broadcastsResultSubscriptions(event, result, client);
 }
 
 socket.on('connection', function(client) {  
+
+    function socketLog(event, msg) {
+      console.log('[socket]', client.id, event, msg);
+    }
+
+    function socketError(err) {
+      socketLog('error', err.stack || err);
+      client.emit('error', err.message);
+    }
 
     // Use socket to communicate with this particular client only, sending it it's own id
     client.emit('welcome', { 
@@ -95,7 +113,8 @@ socket.on('connection', function(client) {
 
     // Add socketSubscriptions
     client.on('subscribe', function(data) {
-          
+        socketLog('subscribe');
+
         // Get current subscription data or create
         var currentData = socketSubscriptions.get(client.id) || {
           id: client.id
@@ -106,44 +125,60 @@ socket.on('connection', function(client) {
 
         // Remove socketSubscriptions on disconnected
         client.on('disconnected', function(client) {
+          socketLog('disconnected');
           socketSubscriptions.delete(client.id);
         });
 
         client.on('unsubscribe', function(data) {
+          socketLog('unsubscribe');
             socketSubscriptions.delete(client.id);
         });
     });
 
     client.on('fetchData', function (data) {
-       main.fetchData(data).then(function (result) {
+      socketLog('fetchData');
+      main.fetchData(data).then(function (result) {
         resultToSocketResponse(client, 'fetchData', result);
-      });
+      }, socketError);
     });
 
     client.on('saveDataObject', function (data) {
+      socketLog('saveDataObject');
       main.saveDataObject(data).then(function (result) {
-        resultToSocketResponse(client, 'deleteDataObject', result);
-      });
+        resultToSocketResponse(client, 'saveDataObject', result);
+      }, socketError);
     });
 
-    client.on('deleteDataObject', function () {
+    client.on('deleteDataObject', function (data) {
+      socketLog('deleteDataObject');
       main.deleteDataObject(data).then(function (result) {
         resultToSocketResponse(client, 'deleteDataObject', result);
-      });
+      }, socketError);
     });
 });
 
 
 // Handle error
 app.use(function (err, req, res, next) {
-  console.error(err.stack || err);
+  console.error("error", err.stack || err);
   res.status(500);
-  res.end(err.message);  
+  res.end(err.messag || err);  
 });
 
 // Start Service endpoint
 
-server.listen(APP_PORT);
-console.log(`Listening on ${APP_HOSTNAME}:${APP_PORT}`);
+server.on('error', function (err) {
+  // Handle your error here
+  console.error("error", err.stack || err);
+});
 
+server.on('listening', function (e) {
+  console.log(`Server Listening on: ${APP_HOSTNAME}:${APP_PORT}`); 
+});
+
+server.listen(APP_PORT);
+
+
+// Expose app
 module.exports = app; // for testing
+// [END main_body]
