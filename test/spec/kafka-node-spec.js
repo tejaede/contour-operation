@@ -333,6 +333,8 @@ describe('Kafka-Client', function () {
       sinon.spy(client, 'setupBrokerProfiles');
       sinon.stub(client, 'createBroker').returns({
         socket: {
+          unref: function () {},
+          destroy: function () {},
           close: function () {},
           end: function () {}
         }

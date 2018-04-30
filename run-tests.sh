@@ -1,7 +1,22 @@
 #!/bin/bash
 
-source start-docker.sh
-export KAFKA_TEST_HOST=$DOCKER_VM_IP
-echo "KAFKA_TEST_HOST: $KAFKA_TEST_HOST"
-./node_modules/.bin/istanbul cover _mocha -- -t 20000 test/**/spec.*js test/index.*js
+npm run start
+echo "Wait for services to start (30sec)"
+sleep 10
+echo "20..."
+sleep 10
+echo "10..."
+sleep 5
+echo "5..."
+sleep 1
+echo "4..."
+sleep 1
+echo "3..."
+sleep 1
+echo "2..."
+sleep 1
+echo "1..."
+sleep 1
+npm run test:istanbul
 docker-compose down
+npm run stop

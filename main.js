@@ -108,7 +108,6 @@ exports.deleteDataObject = function (data) {
     });
 };
 
-
 // Perform saveDataObject operation
 exports.saveDataObject = function (data) {
     // Decode operation prior to get main service

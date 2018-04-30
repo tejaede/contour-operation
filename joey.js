@@ -18,9 +18,6 @@ var main = require('./main');
 
 // Route service controller
 app.route(function (router) {   
-
-	// TODO post data and query
-
 	router("api/data")
 	    .method("GET")
 	    .contentType("application/json")
