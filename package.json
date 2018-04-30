@@ -45,7 +45,8 @@
     "uuid": "^3.2.1"
   },
   "exclude": [
-    "test"
+    "test",
+    "coverage"
   ],
   "scripts": {
     "lint": "jshint .",
