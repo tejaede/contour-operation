@@ -36,6 +36,10 @@ You can also open you browser to "https://localhost:8080" to see a basic Service
 
 ## Troubleshooting & Useful Tools
 
+
+### Links
+- https://www.confluent.io/blog/building-a-microservices-ecosystem-with-kafka-streams-and-ksql/
+
 ### Start and deploy
 
 ```
