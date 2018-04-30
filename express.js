@@ -2,8 +2,6 @@
 'use strict';
 
 // [START main_body]
-process.title = "ring4-server";
-
 var express = require('express');  
 var http = require('http');  
 var io = require('socket.io');

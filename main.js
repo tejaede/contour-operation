@@ -1,6 +1,7 @@
-const PATH = require("path");
-const APP_PATH = process.env.APP_PATH || PATH.join(__dirname, ".");
+/* jshint node: true */
+'use strict';
 
+// [START main_body]
 var Montage = require('montage');
 
 // TODO
@@ -9,27 +10,16 @@ var Montage = require('montage');
 
 var montageRequire;
 function getMontageRequire() {
-    // Once only
-    if (montageRequire) {
-        return Promise.resolve(montageRequire);
-    }
-
-    return Montage.loadPackage(APP_PATH, {
+    // Next call with wait on same promise
+    return montageRequire ? montageRequire : (montageRequire = Montage.loadPackage(__dirname, {
         mainPackageLocation: APP_PATH
-    }).then(function (require) {
-        return (montageRequire = require);
-    });
+    }));
 }
 
 var mainService;
 function getMainService() {
-    return getMontageRequire().then(function (mr) {
-
-        // Once only
-        if (mainService) {
-            return Promise.resolve(mainService);
-        }
-        
+    // Next call with wait on same promise
+    return mainService ? mainService : (mainService = getMontageRequire().then(function (mr) {
         return mr.async('montage/core/serialization/deserializer/montage-deserializer').then(function (module) {
             var Deserializer = module.MontageDeserializer;
             return mr.async('data/main.mjson').then(function (descriptor) {
@@ -37,7 +27,7 @@ function getMainService() {
                 return deserializer.deserializeObject();
             }); 
         });
-    });
+    }));
 }
 
 function serialize(object) {
@@ -56,32 +46,25 @@ function deserialize(data) {
     });
 }
 
+// Deserialize data to query or object
+// TODO wrap in operation or receive operation
 function getOperationFromData(data) {
     if (!data) {
         return Promise.reject('Missing Operation Data');
     }
-
-    return getMontageRequire().then(function (mr) {
-        return mr.async("montage/data/model/data-query").then(function (module) {
-            var DataQuery = module.DataQuery;
-            return mr.async("montage/core/criteria").then(function (module) {
-                var Criteria = module.Criteria;
-                return deserialize(data);
-            });
-        }); 
-    });
+    return deserialize(data);
 }
 
+// Serialize data to query result or object
+// TODO wrap in operation or receive operation
 function getDataOperationResponse(queryResult) {
-    return serialize(queryResult).then(function (queryJson) {
-        //console.log('getDataOperationResponse (serialized)', queryJson);
-        return queryJson;
-    });
+    return serialize(queryResult);
 }
 
+// Perform fetchData operation
 exports.fetchData = function (query) {
-    return getMainService().then(function (mainService) {
-        return getOperationFromData(query).then(function (dataQuery) {
+    return getOperationFromData(query).then(function (dataQuery) {
+        return getMainService().then(function (mainService) {
             //console.log('mainService.fetchData', dataQuery);
             return mainService.fetchData(dataQuery).then(function (queryResult) {
                 return getDataOperationResponse(queryResult);
@@ -90,9 +73,10 @@ exports.fetchData = function (query) {
     });
 };
 
+// Perform deleteDataObject operation
 exports.deleteDataObject = function (data) {
-    return getMainService().then(function (mainService) {
-        return getOperationFromData(data).then(function (dataObject) {
+    return getOperationFromData(data).then(function (dataObject) {
+        return getMainService().then(function (mainService) {
             //console.log('mainService.deleteDataObject', dataObject);
             return mainService.deleteDataObject(dataObject).then(function (result) {
                 return getDataOperationResponse(dataObject);
@@ -101,9 +85,11 @@ exports.deleteDataObject = function (data) {
     });
 };
 
+
+// Perform saveDataObject operation
 exports.saveDataObject = function (data) {
-    return getMainService().then(function (mainService) {
-        return getOperationFromData(data).then(function (dataObject) {
+    return getOperationFromData(data).then(function (dataObject) {
+        return getMainService().then(function (mainService) {
             //console.log('mainService.saveDataObject', dataObject);
             return mainService.saveDataObject(dataObject).then(function (result) {
                 return getDataOperationResponse(dataObject);
