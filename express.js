@@ -14,8 +14,8 @@ const APP_HOSTNAME = process.env.APP_HOSTNAME || 'localhost';
 const APP_PORT = process.env.APP_PORT || '8080';
 
 var app = express();  
-var server = http.createServer(app)
-var socket = io(server)
+var server = http.createServer(app);
+var socket = io(server);
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {
