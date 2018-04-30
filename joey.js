@@ -19,34 +19,31 @@ var main = require('./main');
 // Route service controller
 app.route(function (router) {   
 
-    // TODO PUT
-    // TODO data/:id
+	// TODO post data and query
 
 	router("api/data")
 	    .method("GET")
 	    .contentType("application/json")
-	    .contentApp(function (request) {
-	        return main.fetchData(request).catch(function (err) {
+	    .contentApp(function (req) {
+	        return main.fetchData(req.query.query).catch(function (err) {
 	            console.error(err, err.stack);
 	            throw err;
 	        });
 	    });
-
-	router("api/data")
+	router("api/data/delete")
 	    .method("DELETE")
 	    .contentType("application/json")
-	    .contentApp(function (request) {
-	        return main.deleteDataObject(request).catch(function (err) {
+	    .contentApp(function (req) {
+	        return main.deleteDataObject(req.body.data).catch(function (err) {
 	            console.error(err, err.stack);
 	            throw err;
 	        });
 	    });
-
-	router("api/data")
+	router("api/data/save")
 	    .method("POST") 
 	    .contentType("application/json")
-	    .contentApp(function (request) {
-	        return main.saveDataObject(request).catch(function (err) {
+	    .contentApp(function (req) {
+	        return main.saveDataObject(req.body.data).catch(function (err) {
 	            console.error(err, err.stack);
 	            throw err;
 	        });
