@@ -14,6 +14,16 @@ const APP_PUBLIC_PATH = process.env.APP_PUBLIC_PATH || __dirname;
 const APP_HOSTNAME = process.env.APP_HOSTNAME || 'localhost';
 const APP_PORT = process.env.APP_PORT || '8080';
 
+
+// Log uncaughtException and graceful shutdown once
+var uncaughtedException;
+process.on('uncaughtException', function (err) {
+  console.error("uncaughtException", err.stack || err);
+
+  // Better exit now.
+  process.exit(1);
+});
+
 var app = express();  
 var httpServer = http.createServer(app);
 var socketServer = io.listen(httpServer);
@@ -53,9 +63,7 @@ var main = require('./main');
 //
 
 function resultToHttpResponse(response, event, result) {
-    response.header("Content-Type", "application/json");
-    response.send(result);
-    response.end();
+    response.json(result);
 }
 
 app.route("/api/data")
@@ -88,21 +96,25 @@ app.route("/api/data/delete")
 //
 
 var socketSubscriptions = new Map();
-function broadcastsResultSubscriptions(event, data, clientSource) {
-  console.log('[socket]', clientSource && clientSource.id, 'broadcastsResultSubscriptions', event);
+function broadcastsResultSubscriptions(client, event, result) {
+  console.log('[socket]', client && client.id, 'broadcastsResultSubscriptions', event);
   return Array.from(socketSubscriptions).filter(function (socketSubscription) {
-    return clientSource && socketSubscription.id !== clientSource.id;
+    return client && socketSubscription.id !== client.id;
   }).map(function (socketSubscription) {
-    return socketServer.to(socketSubscription.id).emit(event, data);
+    return socketServer.to(socketSubscription.id).emit(event, result);
   });
 }
 
-function resultToSocketResponse(client, event, result) {
-    // Preparse
-    result = JSON.parse(result);
 
-    client.emit(event, result);
-    broadcastsResultSubscriptions(event, result, client);
+function resultToSocketResponse(client, event, result, callback) {
+
+    if (callback) {
+      callback(result);
+    } else {
+      client.emit(event, result); 
+    }
+    
+    broadcastsResultSubscriptions(client, event, result);
 }
 
 socketServer.on('connection', function(client) {  
@@ -147,24 +159,24 @@ socketServer.on('connection', function(client) {
         });
     });
 
-    client.on('fetchData', function (data) {
-      socketLog('fetchData');
+    client.on('fetchData', function (data, callback) {
+      socketLog('fetchData', typeof data);
       main.fetchData(data).then(function (result) {
-        resultToSocketResponse(client, 'fetchData', result);
+        resultToSocketResponse(client, 'fetchData', result, callback);
       }, socketError);
     });
 
-    client.on('saveDataObject', function (data) {
-      socketLog('saveDataObject');
+    client.on('saveDataObject', function (data, callback) {
+      socketLog('saveDataObject', typeof data);
       main.saveDataObject(data).then(function (result) {
-        resultToSocketResponse(client, 'saveDataObject', result);
+        resultToSocketResponse(client, 'saveDataObject', result, callback);
       }, socketError);
     });
 
-    client.on('deleteDataObject', function (data) {
-      socketLog('deleteDataObject');
+    client.on('deleteDataObject', function (data, callback) {
+      socketLog('deleteDataObject', typeof data);
       main.deleteDataObject(data).then(function (result) {
-        resultToSocketResponse(client, 'deleteDataObject', result);
+        resultToSocketResponse(client, 'deleteDataObject', result, callback);
       }, socketError);
     });
 });
@@ -173,7 +185,7 @@ socketServer.on('connection', function(client) {
 app.use(function (err, req, res, next) {
   console.error("error", err.stack || err);
   res.status(500);
-  res.end(err.messag || err);  
+  res.end(err.message || err);  
 });
 
 // Start Service endpoint
