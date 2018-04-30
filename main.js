@@ -4,14 +4,13 @@
 // [START main_body]
 var Montage = require('montage');
 
-// TODO
-// In progress - Load Service/Model/Mapping programaticly 
-// Next - Load Via main.mjson
+const PATH = require("path");
+const APP_PATH = process.env.APP_PATH || PATH.join(__dirname, ".");
 
 var montageRequire;
 function getMontageRequire() {
     // Next call with wait on same promise
-    return montageRequire ? montageRequire : (montageRequire = Montage.loadPackage(__dirname, {
+    return montageRequire ? montageRequire : (montageRequire = Montage.loadPackage(APP_PATH, {
         mainPackageLocation: APP_PATH
     }));
 }
