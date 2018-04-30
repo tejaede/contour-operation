@@ -30,20 +30,20 @@ app.route(function (router) {
 	            throw err;
 	        });
 	    });
-	router("api/data/delete")
-	    .method("DELETE")
-	    .contentType("application/json")
-	    .contentApp(function (req) {
-	        return main.deleteDataObject(req.body.data).catch(function (err) {
-	            console.error(err, err.stack);
-	            throw err;
-	        });
-	    });
 	router("api/data/save")
 	    .method("POST") 
 	    .contentType("application/json")
 	    .contentApp(function (req) {
 	        return main.saveDataObject(req.body.data).catch(function (err) {
+	            console.error(err, err.stack);
+	            throw err;
+	        });
+	    });
+	router("api/data/delete")
+	    .method("POST")
+	    .contentType("application/json")
+	    .contentApp(function (req) {
+	        return main.deleteDataObject(req.body.data).catch(function (err) {
 	            console.error(err, err.stack);
 	            throw err;
 	        });
@@ -57,7 +57,7 @@ app.directoryIndex()
 // Serve app
 app.listen(APP_PORT)
 	.then(function () {
-	    console.log(`Listening on ${APP_HOSTNAME}:${APP_PORT}`);
+	    console.log(`Server Listening on ${APP_HOSTNAME}:${APP_PORT}`);
 	})
 	.done();
 

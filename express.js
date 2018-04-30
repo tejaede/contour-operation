@@ -8,14 +8,15 @@ var io = require('socket.io');
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+var compression = require('compression');
 
 const APP_PUBLIC_PATH = process.env.APP_PUBLIC_PATH || __dirname;
 const APP_HOSTNAME = process.env.APP_HOSTNAME || 'localhost';
 const APP_PORT = process.env.APP_PORT || '8080';
 
 var app = express();  
-var server = http.createServer(app);
-var socket = io(server);
+var httpServer = http.createServer(app);
+var socketServer = io.listen(httpServer);
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {
@@ -27,8 +28,21 @@ app.use(cors()); // support cross-origin
 app.use(bodyParser.json()); // support json encoded body
 app.use(bodyParser.urlencoded({extended: true})); // support encoded body
 
+
+// Should be placed before express.static
+// To ensure that all assets and data are compressed (utilize bandwidth)
+app.use(compression({
+    // Levels are specified in a range of 0 to 9, where-as 0 is
+    // no compression and 9 is best compression, but slowest
+    level: 9
+}));
+
 // Serve statics
-app.use(express.static(APP_PUBLIC_PATH));
+app.use(express.static(APP_PUBLIC_PATH, {
+    maxAge: '60d',
+    dotfiles: 'ignore',
+    etag: true
+}));
 
 // Load controller
 var main = require('./main');
@@ -79,7 +93,7 @@ function broadcastsResultSubscriptions(event, data, clientSource) {
   return Array.from(socketSubscriptions).filter(function (socketSubscription) {
     return clientSource && socketSubscription.id !== clientSource.id;
   }).map(function (socketSubscription) {
-    return socket.to(socketSubscription.id).emit(event, data);
+    return socketServer.to(socketSubscription.id).emit(event, data);
   });
 }
 
@@ -91,14 +105,14 @@ function resultToSocketResponse(client, event, result) {
     broadcastsResultSubscriptions(event, result, client);
 }
 
-socket.on('connection', function(client) {  
+socketServer.on('connection', function(client) {  
 
     function socketLog(event, msg) {
       console.log('[socket]', client.id, event, msg);
     }
 
     function socketError(err) {
-      socketLog('error', err.stack || err);
+      console.error("[socket]", 'error', err.stack || err);
       client.emit('error', err.message);
     }
 
@@ -155,7 +169,6 @@ socket.on('connection', function(client) {
     });
 });
 
-
 // Handle error
 app.use(function (err, req, res, next) {
   console.error("error", err.stack || err);
@@ -164,18 +177,17 @@ app.use(function (err, req, res, next) {
 });
 
 // Start Service endpoint
-
-server.on('error', function (err) {
+httpServer.on('error', function (err) {
   // Handle your error here
   console.error("error", err.stack || err);
 });
 
-server.on('listening', function (e) {
-  console.log(`Server Listening on: ${APP_HOSTNAME}:${APP_PORT}`); 
+httpServer.on('listening', function (e) {
+  console.info(`Server Listening on: ${APP_HOSTNAME}:${APP_PORT}`); 
 });
 
-server.listen(APP_PORT);
-
+// Start server
+httpServer.listen(APP_PORT);
 
 // Expose app
 module.exports = app; // for testing
