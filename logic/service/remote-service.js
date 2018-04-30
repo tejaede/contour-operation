@@ -75,7 +75,7 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
         value: function (rawData, object) {
 
             var self = this,
-                url = '/api/data';
+                url = '/api/data/save';
 
             return self._serialize(object).then(function (dataObjectJSON) {
                 //console.log('saveRawData', queryJSON);

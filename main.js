@@ -57,37 +57,11 @@ function deserialize(data) {
     });
 }
 
-function createDataQueryFromParams(queryParam) {
-    return getMontageRequire().then(function (mr) {
-        return mr.async("montage/data/model/data-query").then(function (module) {
-            var DataQuery = module.DataQuery;
-            return mr.async("montage/core/criteria").then(function (module) {
-                var Criteria = module.Criteria;
-                return mr.async("data/descriptors/message.mjson").then(function (module) {
-                    
-                    // A Default Query
-                    var dataType = module.montageObject;
-                    var dataExpression = "";
-                    var dataParameters = {};
+function getOperationFromData(data) {
+    if (!data) {
+        return Promise.reject('Missing Operation Data');
+    }
 
-                    var dataCriteria = new Criteria().initWithExpression(dataExpression, dataParameters);
-                    var dataQuery  = DataQuery.withTypeAndCriteria(dataType, dataCriteria);
-             
-                    // Re-Convert to serialized version
-                    return serialize(dataQuery).then(function (queryJson) {
-                        console.log('createDataQueryFromParams (serialized)', queryJson);
-                        return dataQuery;
-                    }).catch(function (err) {
-                        console.log(err);
-                        throw err;
-                    });
-                });
-            });
-        }); 
-    });
-}
-
-function getDataOperationFromData(data) {
     return getMontageRequire().then(function (mr) {
         return mr.async("montage/data/model/data-query").then(function (module) {
             var DataQuery = module.DataQuery;
@@ -99,52 +73,41 @@ function getDataOperationFromData(data) {
     });
 }
 
-function getDataOperationFromRequest(request) {
-    console.log(request.body)
-    var queryParam = request && (request.query.query || request.body.data);
-    return queryParam ? 
-        getDataOperationFromData(queryParam) : 
-            createDataQueryFromParams(request);
-}
-function getDataOperationResponse(response, queryResult) {
+function getDataOperationResponse(queryResult) {
     return serialize(queryResult).then(function (queryJson) {
         //console.log('getDataOperationResponse (serialized)', queryJson);
         return queryJson;
     });
 }
 
-exports.getQuery = function (req, res) {
-
-};
-
-exports.fetchData = function (req, res) {
+exports.fetchData = function (query) {
     return getMainService().then(function (mainService) {
-        return getDataOperationFromRequest(req).then(function (dataQuery) {
-            console.log('mainService.fetchData', dataQuery);
+        return getOperationFromData(query).then(function (dataQuery) {
+            //console.log('mainService.fetchData', dataQuery);
             return mainService.fetchData(dataQuery).then(function (queryResult) {
-                return getDataOperationResponse(res, queryResult);
+                return getDataOperationResponse(queryResult);
             });
         });
     });
 };
 
-exports.deleteDataObject = function (req, res) {
+exports.deleteDataObject = function (data) {
     return getMainService().then(function (mainService) {
-        return getDataOperationFromRequest(req).then(function (dataObject) {
-            console.log('mainService.deleteDataObject', dataObject);
+        return getOperationFromData(data).then(function (dataObject) {
+            //console.log('mainService.deleteDataObject', dataObject);
             return mainService.deleteDataObject(dataObject).then(function (result) {
-                return getDataOperationResponse(res, dataObject);
+                return getDataOperationResponse(dataObject);
             });
         });
     });
 };
 
-exports.saveDataObject = function (req, res) {
+exports.saveDataObject = function (data) {
     return getMainService().then(function (mainService) {
-        return getDataOperationFromRequest(req).then(function (dataObject) {
-            console.log('mainService.saveDataObject', dataObject);
+        return getOperationFromData(data).then(function (dataObject) {
+            //console.log('mainService.saveDataObject', dataObject);
             return mainService.saveDataObject(dataObject).then(function (result) {
-                return getDataOperationResponse(res, dataObject);
+                return getDataOperationResponse(dataObject);
             });
         });
     });
