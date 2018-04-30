@@ -2,8 +2,11 @@
  
 var program = require('commander');
  
+var package = require('./package.json');
+var program = require('commander');
+ 
 program
-  .version('0.1.0')
+  .version(package.version)
   .option('-f, --fetchData [query]', 'fetch data')
   .option('-f, --saveDataObject [query]', 'fetch data')
   .option('-f, --fetchData [query]', 'fetch data')

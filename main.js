@@ -35,7 +35,11 @@ function getMainService() {
 function serialize(object) {
     return getMontageRequire().then(function (mr) {
         return mr.async('montage/core/serialization/serializer/montage-serializer').then(function (module) {
+            // TODO allow serialize to return JSON Object not string
             return module.serialize(object, mr); 
+        }).then(function (result) {
+            // Preparse
+            return JSON.parse(result);
         });
     });
 }
@@ -79,6 +83,13 @@ function getOperationFromData(data) {
 function getDataOperationResponse(queryResult) {
     return serialize(queryResult);
 }
+
+// Initialize Main Service.
+console.time('MainService');
+getMainService().then(function () {
+    console.timeEnd('MainService');
+    console.log("MainService Ready!");  
+});
 
 // Perform fetchData operation
 exports.fetchData = function (query) {

@@ -50,18 +50,17 @@ describe('Message WS API', () => {
                 }
               }
             };
-            socket.once('fetchData', function(res) {     
+            socket.emit('fetchData', query, function(res) {     
                 expect(res).to.be.a('object');
                 expect(res).to.have.property('root');
                 expect(res.root).to.be.a('object');
                 expect(res.root).to.have.property('value');
                 done();
             });
-            socket.emit('fetchData', query);
         });
     });
     describe('saveDataObject', () => {
-        it('it should GET all the messages', (done) => {
+        it('it should POST a {{name}}', (done) => {
             var message = {
               "root": {
                 "prototype": "logic/model/message-model[Message]",
@@ -71,14 +70,13 @@ describe('Message WS API', () => {
                 }
               }
             };
-            socket.once('saveDataObject', function(res) {     
+            socket.emit('saveDataObject', message, function(res) {     
                 expect(res).to.be.a('object');
                 expect(res).to.have.property('root');
                 expect(res.root).to.be.a('object');
                 expect(res.root).to.have.property('values');
                 done();
             });
-            socket.emit('saveDataObject', message);
         });
     });
     describe('deleteDataObject', () => {
@@ -96,14 +94,13 @@ describe('Message WS API', () => {
                 }
               }
             };
-            socket.once('deleteDataObject', function(res) {  
+            socket.emit('deleteDataObject', message, function(res) {  
                 expect(res).to.be.a('object');
                 expect(res).to.have.property('root');
                 expect(res.root).to.be.a('object');
                 expect(res.root).to.have.property('values');
                 done();
             });
-            socket.emit('deleteDataObject', message);
         });
     });
 });
