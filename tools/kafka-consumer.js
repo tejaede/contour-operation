@@ -6,10 +6,11 @@ var Client = kafka.Client;
 var Consumer = kafka.Consumer;
 var Offset = kafka.Offset;
 
+var package = require('./../package.json');
 var program = require('commander');
  
 program
-  .version('0.1.0') // TODO use package versiob
+  .version(package.version)
   .option('-s, --start [topic]', 'start consumer for given topic', 'topic1')
   .option('-url, --url [url]', 'url with port (e.g localhost:2181)  ', 'localhost:2181')
   .option('-p, --partition [partition]', 'partition', 0)

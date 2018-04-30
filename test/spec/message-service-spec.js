@@ -66,7 +66,6 @@ describe('Message HTTP API', () => {
               data: message
             })
             .end((err, res) => {
-              console.log(res.body);
                 expect(err).to.be.null;
                 expect(res).to.have.status(200);
                 expect(res.body).to.be.a('object');

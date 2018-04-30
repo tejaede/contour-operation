@@ -43,7 +43,6 @@ function getMainService() {
 function serialize(object) {
     return getMontageRequire().then(function (mr) {
         return mr.async('montage/core/serialization/serializer/montage-serializer').then(function (module) {
-            //console.log('kkk')
             return module.serialize(object, mr); 
         });
     });

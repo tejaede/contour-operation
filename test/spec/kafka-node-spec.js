@@ -15,10 +15,10 @@ const _ = require('lodash');
 const async = require('async');
 const BufferList = require('bl');
 
-describe('Client', function () {
+describe('Kafka-Client', function () {
   var client = null;
 
-  describe('#handleReceivedData', function () {
+  describe('handleReceivedData', function () {
     var socket;
 
     beforeEach(function () {

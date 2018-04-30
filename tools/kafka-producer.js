@@ -5,10 +5,11 @@ var Producer = kafka.Producer;
 var KeyedMessage = kafka.KeyedMessage;
 var Client = kafka.Client;
 
+var package = require('./../package.json');
 var program = require('commander');
  
 program
-  .version('0.1.0') // TODO use package versiob
+  .version(package.version)
   .option('-s, --start [topic]', 'start consumer for given topic', 'topic1')
   .option('-u, --url [url]', 'url with port (e.g localhost:2181)  ', 'localhost:2181')
   .option('-k, --key [key]', 'key', 'keyed')
