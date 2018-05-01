@@ -1,31 +1,21 @@
-var HttpService = require("montage/data/service/http-service").HttpService,
+var Montage = require("montage").Montage,
+    HttpService = require("montage/data/service/http-service").HttpService,
+    RawDataService = require("montage/data/service/raw-data-service").RawDataService,
     Promise = require("montage/core/promise").Promise;
 
 var serialize = require("montage/core/serialization/serializer/montage-serializer").serialize;
 var deserialize = require("montage/core/serialization/deserializer/montage-deserializer").deserialize;
+var io = require('socket.io-client/dist/socket.io');
 
 /**
- * Provides Message
+ * Provides AbstractRemoteService
  *
  * @class
- * @extends external:HttpService
+ * @extends external:AbstractRemoteService
  */
-exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototype */ {
+exports.AbstractRemoteService = {
 
-    // TODO
-    // Cause Can\'t fetch data of unknown type
-    // Need to me module not object
-    /*
-    types: {
-        value: [Message]
-    },
-
-    MessageMapping: {
-        value: null
-    },
-    */
-
-    _serialize: {
+   _serialize: {
         value: function (dataObject) {
             
             var self = this,
@@ -50,17 +40,20 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
     // Entry points
     //==========================================================================
 
+    _performOperation: {
+        value: function (action, data) {
+            return Promise.reject('Not Implemented');
+        }
+    },
+
     // Get and query
     fetchRawData: {
         value: function (stream) {
             var self = this,
                 query = stream.query,
-                url = '/api/data';
-
+                action = 'fetchData';
             return self._serialize(query).then(function (queryJSON) {
-                //console.log('fetchRawData', queryJSON);
-                url += '?query=' + encodeURIComponent(queryJSON);
-                return self.fetchHttpRawData(url, null, null, false).then(function (remoteDataJson) {
+                return self._performOperation(action, queryJSON).then(function (remoteDataJson) {
                     return self._deserialize(remoteDataJson).then(function (remoteData) {
                         stream.addData(remoteData);
                         stream.dataDone();
@@ -73,24 +66,11 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
     // Create and update
     saveRawData: {
         value: function (rawData, object) {
-
             var self = this,
-                url = '/api/data/save';
-
+                action = 'saveDataObject';
             return self._serialize(object).then(function (dataObjectJSON) {
-                //console.log('saveRawData', queryJSON);
-
-                var headers = {
-                        "Content-Type": "application/json"
-                    },
-                    body = JSON.stringify({
-                        data: dataObjectJSON
-                    });
-
-                return self.fetchHttpRawData(url, headers, body, false).then(function (remoteObjectJSON) {
+                return self._performOperation(action, dataObjectJSON).then(function (remoteObjectJSON) {
                     return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
-                        //var objectDescriptor = self.objectDescriptorForObject(object);
-                        // TODO wait for objectDescriptor object to object update
                         return self._mapRawDataToObject(remoteObject, object);
                     });
                 });
@@ -102,24 +82,171 @@ exports.RemoteService = HttpService.specialize(/** @lends MessageService.prototy
     deleteRawData: {
         value: function (rawData, object) {
             var self = this,
-                url = '/api/data/delete';
-
-            // TODO DELETE
+                action = 'deleteDataObject';
             return self._serialize(object).then(function (dataObjectJSON) {
-                //console.log('deleteRawData', dataObjectJSON);
-
-                var headers = {
-                        "Content-Type": "application/json"
-                    },
-                    body = JSON.stringify({
-                        data: dataObjectJSON
-                    });
-
-                return self.fetchHttpRawData(url, headers, body, false).then(function (remoteObjectJSON) {
-                    // Previous object
-                    //return self._deserialize(remoteObjectJSON);
-                });
+                return self._performOperation(action, dataObjectJSON);
             }); 
         }
     }
+};
+
+/*
+ * Provides RemoteService and  HttpRemoteService
+ *
+ * @class
+ * @extends external:RemoteService
+ */
+exports.HttpRemoteService = HttpService.specialize(exports.AbstractRemoteService).specialize(/** @lends RemoteService.prototype */ {
+
+    _baseUrl: {
+        value: '/api/data'
+    },
+
+    _actionsToPaths: {
+        value: {
+            'fetchData': '',
+            'saveDataObject': '/save',
+            'deleteDataObject': '/delete'
+        }
+    },
+
+    constructor: {
+        value: function HttpRemoteService() {
+            // TODO opts
+        }
+    },
+
+    _performOperation: {
+        value: function (action, data) {
+            var body, url, headers, 
+                self = this;
+
+            if (!self._actionsToPaths.hasOwnProperty(action)) {
+                return Promise.reject('Invalid action "' + action + '"');
+            } else if (!data) {
+                return Promise.reject('Missing or invalid data');
+            }
+            
+            url = self._baseUrl + self._actionsToPaths[action];
+
+            if (action !== 'fetchData') {
+                headers = {
+                    "Content-Type": "application/json"
+                };
+                body = JSON.stringify({
+                    data: data
+                });
+            } else {
+                url += '?query=' + encodeURIComponent(data);
+            }   
+
+            return self.fetchHttpRawData(url, headers, body, false);
+        }  
+    } 
 });
+
+/*
+ * Provides WebSocketRemoteService
+ *
+ * @class
+ * @extends external:WebSocketRemoteService
+ */
+exports.WebSocketRemoteService = RawDataService.specialize(exports.AbstractRemoteService).specialize(/** @lends WebSocketRemoteService.prototype */ {
+
+    _baseUrl: {
+        value: ''
+    },
+
+    _socket: {
+        value: null
+    },
+
+    _socketOptions: {
+        value: {
+            'reconnection delay': 0,
+            'reopen delay': 0,
+            'force new connection': true
+        }
+    },
+
+    constructor: {
+        value: function WebSocketRemoteService() {
+            this._getSocket();
+        }
+    },
+
+    _getSocket: {
+        value: function () { 
+            var self = this;
+            return self._socket ? self._socket : (self._socket = new Promise(function (resolve, reject) {  
+                // Setup
+                var socket = io.connect(self._baseUrl, self._socketOptions);
+                socket.on('connect', function() {
+                    // TODO
+                    //console.log('worked...');
+                });
+                socket.on('disconnect', function() {
+                    // TODO
+                    //console.log('disconnected...');
+                });
+
+                socket.on('fetchData', function() {
+                    // TODO
+                    // dispatch result ? on main root service
+                });
+
+                socket.on('saveDataObject', function() {
+                    // TODO
+                    // dispatch on main root service
+                });
+
+                socket.on('deleteDataObject', function() {
+                    // TODO
+                    // dispatch on main root service
+                });
+
+                resolve(socket);
+            }));
+        }
+    },
+
+    _performOperation: {
+        value: function (action, data) {
+            var self = this;
+            return self._getSocket().then(function (socket) {
+                return new Promise(function (resolve, reject) {  
+                    socket.emit(action, data, function(res) {
+                        // TODO handle error reject     
+                        resolve(res);
+                    }); 
+                });
+            });
+        }
+    }
+});
+
+/*
+ * Provides WorkerRemoteService
+ *
+ * @class
+ * @extends external:WorkerRemoteService
+ */
+exports.WorkerRemoteService = RawDataService.specialize(exports.AbstractRemoteService).specialize(/** @lends WorkerRemoteService.prototype */ {
+
+    constructor: {
+        value: function WorkerRemoteService() {
+            this._getWorker();
+        }
+    },
+
+    _getWorker: function () {
+
+    },
+
+    _performOperation: function () {
+
+    }
+});
+
+exports.RemoteService = exports.HttpRemoteService;
+//exports.RemoteService = exports.WebSocketRemoteService;
