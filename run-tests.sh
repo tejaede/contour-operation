@@ -18,5 +18,4 @@ sleep 1
 echo "1..."
 sleep 1
 npm run test:istanbul
-docker-compose down
 npm run stop
