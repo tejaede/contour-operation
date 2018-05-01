@@ -163,9 +163,10 @@ exports.WebSocketRemoteService = RawDataService.specialize(exports.AbstractRemot
 
     _socketOptions: {
         value: {
-            'reconnection delay': 0,
-            'reopen delay': 0,
-            'force new connection': true
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax : 5000,
+            reconnectionAttempts: Infinity
         }
     },
 
