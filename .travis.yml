@@ -21,7 +21,6 @@ env:
 before_install:
   - sudo apt-get update
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
-  - docker-compose -f docker-compose.yml -f docker/docker-compose.${KAFKA_VERSION}.yml build
 before_script:
   - npm prune
 after_failure:
