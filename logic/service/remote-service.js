@@ -1,5 +1,6 @@
 var Montage = require("montage").Montage,
     HttpService = require("montage/data/service/http-service").HttpService,
+    ObjectDescriptor = require("montage/core/meta/object-descriptor").ObjectDescriptor,
     RawDataService = require("montage/data/service/raw-data-service").RawDataService,
     Promise = require("montage/core/promise").Promise;
 
@@ -35,13 +36,128 @@ exports.AbstractRemoteService = {
             });
         }
     },
-    
+
+    deserializeSelf: {
+        value:function (deserializer) {
+            this.super(deserializer);
+            value = deserializer.getProperty("serviceReferences");
+            if (value) {
+                this.registerServiceReferences(value);
+            }
+        }
+    },
+
+    //
+    // Service Reference
+    //
+
+    registerServiceReferences: {
+        value: function (childServices) {
+            var self;
+            if (!this.__childServiceRegistrationPromise) {
+                self = this;
+                this.__childServiceRegistrationPromise = Promise.all(childServices.map(function (child) {
+                    return self.registerServiceReference(child);
+                }));
+            }
+        }
+    },
+
+    registerServiceReference: {
+        value: function (child, types) {
+            var self = this;
+            // possible types
+            // -- types is passed in as an array or a single type.
+            // -- a model is set on the child.
+            // -- types is set on the child.
+            // any type can be asychronous or synchronous.
+                types = types && Array.isArray(types) && types ||
+                        types && [types] ||
+                        child.model && child.model.objectDescriptors ||
+                        child.types && Array.isArray(child.types) && child.types ||
+                        child.types && [child.types] ||
+                        [];
+
+            return self._registerServiceReferenceTypes(child, types);
+        }
+    },
+
+    _registerServiceReferenceTypes: {
+        value: function (child, types) {
+            var self = this;
+            return this._resolveAsynchronousTypes(types).then(function (descriptors) {
+                self._registerTypesByModuleId(descriptors);
+                self._addReferenceService(child, types);
+                return null;
+            });
+        }
+    },
+
+    _referenceService: {
+        value: undefined
+    },
+
+    referenceService: {
+        get: function() {
+            if (!this._referenceService) {
+                this._referenceService = new Set();
+            }
+            return this._referenceService;
+        }
+    },
+
+    referenceServicesByType: {
+        get: function () {
+            if (!this._referenceServicesByType) {
+                this._referenceServicesByType = new Map();
+            }
+            return this._referenceServicesByType;
+        }
+    },
+
+    _referenceServicesByType: {
+        value: undefined
+    },
+
+    _addReferenceService: {
+        value: function (child, types) {
+            var children, type, i, n, nIfEmpty = 1;
+            types = types || child.model && child.model.objectDescriptors || child.types;
+            
+            // Add the new child to this service's children set.
+            this.referenceService.add(child);
+
+            // Add the new child service to the services array of each of its
+            // types or to the "all types" service array identified by the
+            // `null` type, and add each of the new child's types to the array
+            // of child types if they're not already there.
+
+            for (i = 0, n = types && types.length || nIfEmpty; i < n; i += 1) {
+                type = types && types.length && types[i] || null;
+                children = this.referenceServicesByType.get(type) || [];
+                children.push(child);
+                if (children.length === 1) {
+                    this.referenceServicesByType.set(type, children);
+                }
+            }
+        }
+    },
+
+    _referenceServiceForType: {
+        value: function (type) {
+            var services;
+            type = type instanceof ObjectDescriptor ? type : this._objectDescriptorForType(type);
+            services = this._referenceServicesByType.get(type) || this._referenceServicesByType.get(null);
+            return services && services[0] || null;
+        }
+    },
+
     //==========================================================================
     // Entry points
     //==========================================================================
 
     _performOperation: {
-        value: function (action, data) {
+        value: function (action, data, service) {
             return Promise.reject('Not Implemented');
         }
     },
@@ -50,15 +166,19 @@ exports.AbstractRemoteService = {
     fetchRawData: {
         value: function (stream) {
             var self = this,
+                action = 'fetchData',
                 query = stream.query,
-                action = 'fetchData';
-            return self._serialize(query).then(function (queryJSON) {
-                return self._performOperation(action, queryJSON).then(function (remoteDataJson) {
-                    return self._deserialize(remoteDataJson).then(function (remoteData) {
-                        stream.addData(remoteData);
-                        stream.dataDone();
-                    });
-                }); 
+                service = self._referenceServiceForType(query.type);
+
+            return self._serialize(service).then(function (serviceJSON) {
+                return self._serialize(query).then(function (queryJSON) {
+                    return self._performOperation(action, queryJSON, serviceJSON).then(function (remoteDataJson) {
+                        return self._deserialize(remoteDataJson).then(function (remoteData) {
+                            stream.addData(remoteData);
+                            stream.dataDone();
+                        });
+                    }); 
+                });
             }); 
         }
     },
@@ -67,14 +187,19 @@ exports.AbstractRemoteService = {
     saveRawData: {
         value: function (rawData, object) {
             var self = this,
-                action = 'saveDataObject';
-            return self._serialize(object).then(function (dataObjectJSON) {
-                return self._performOperation(action, dataObjectJSON).then(function (remoteObjectJSON) {
-                    return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
-                        return self._mapRawDataToObject(remoteObject, object);
+                action = 'saveDataObject',
+                type = self.objectDescriptorForObject(object),
+                service = self._referenceServiceForType(type);
+                
+            return self._serialize(service).then(function (serviceJSON) {
+                return self._serialize(object).then(function (dataObjectJSON) {
+                    return self._performOperation(action, dataObjectJSON, serviceJSON).then(function (remoteObjectJSON) {
+                        return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
+                            return self._mapRawDataToObject(remoteObject, object);
+                        });
                     });
-                });
-            }); 
+                }); 
+            });
         }
     },
 
@@ -82,10 +207,15 @@ exports.AbstractRemoteService = {
     deleteRawData: {
         value: function (rawData, object) {
             var self = this,
-                action = 'deleteDataObject';
-            return self._serialize(object).then(function (dataObjectJSON) {
-                return self._performOperation(action, dataObjectJSON);
-            }); 
+                action = 'deleteDataObject',
+                type = self.objectDescriptorForObject(object),
+                service = self._referenceServiceForType(type);
+
+            return self._serialize(service).then(function (serviceJSON) {
+                return self._serialize(object).then(function (dataObjectJSON) {
+                    return self._performOperation(action, dataObjectJSON, serviceJSON);
+                }); 
+            });
         }
     }
 };
@@ -117,7 +247,7 @@ exports.HttpRemoteService = HttpService.specialize(exports.AbstractRemoteService
     },
 
     _performOperation: {
-        value: function (action, data) {
+        value: function (action, data, service) {
             var body, url, headers, 
                 self = this;
 
@@ -134,10 +264,11 @@ exports.HttpRemoteService = HttpService.specialize(exports.AbstractRemoteService
                     "Content-Type": "application/json"
                 };
                 body = JSON.stringify({
-                    data: data
+                    data: data,
+                    service: service
                 });
             } else {
-                url += '?query=' + encodeURIComponent(data);
+                url += '?query=' + encodeURIComponent(data) + '&service=' + encodeURIComponent(service);
             }   
 
             return self.fetchHttpRawData(url, headers, body, false);

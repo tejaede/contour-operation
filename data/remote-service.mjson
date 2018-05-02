@@ -22,6 +22,15 @@
             "mappings": [
                  {"@": "MessageMapping"},
                  {"@": "PersonMapping"}
+            ],
+            "serviceReferences": [
+                 {
+                    "module": {"%": "logic/service/message-service.mjson"}, 
+                    "types": [
+                         {"@": "Message"},
+                         {"@": "Person"}
+                    ]
+                 }
             ]
         }
     }
