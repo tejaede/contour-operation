@@ -23,8 +23,7 @@
               }
             }
           };
-        socket.emit('fetchData', query);
-        socket.on('fetchData', function(data) {
+        socket.emit('fetchData', query, function(data) {
             console.log(data);
         });
     });

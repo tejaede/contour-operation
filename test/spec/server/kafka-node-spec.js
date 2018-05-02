@@ -5,8 +5,8 @@ var kafka = require('kafka-node');
 var Client = kafka.Client;
 var uuid = require('uuid');
 var should = require('should');
-var FakeZookeeper = require('./../helpers/mockZookeeper');
-var FakeSocket = require('./../helpers/mockSocket');
+var FakeZookeeper = require('./../../helpers/mockZookeeper');
+var FakeSocket = require('./../../helpers/mockSocket');
 var InvalidConfigError = require('kafka-node/lib/errors/InvalidConfigError');
 var proxyquire = require('proxyquire').noCallThru();
 var sinon = require('sinon');
@@ -15,7 +15,7 @@ const _ = require('lodash');
 const async = require('async');
 const BufferList = require('bl');
 
-describe('Kafka-Client', function () {
+describe('Kafka-Client Server', function () {
   var client = null;
 
   describe('handleReceivedData', function () {

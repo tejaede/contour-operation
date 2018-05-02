@@ -60,7 +60,7 @@ describe('Message WS API', () => {
         });
     });
     describe('saveDataObject', () => {
-        it('it should POST a {{name}}', (done) => {
+        it('it should POST a message', (done) => {
             var message = {
               "root": {
                 "prototype": "logic/model/message-model[Message]",

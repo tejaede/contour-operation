@@ -3,16 +3,17 @@ process.env.NODE_ENV = 'test';
 
 var chai = require('chai');
 var chaiHttp = require('chai-http');
-chai.use(chaiHttp);
+var io = require('socket.io-client');
 
+// Configure Test ENV
+chai.use(chaiHttp);
+// Export Global
 global.chai = chai;
 global.should = chai.should();
 global.expect = chai.expect;
-
-
-var io = require('socket.io-client');
 global.io = io;
 
-require('./spec/message-service-spec');
-require('./spec/message-service-ws-spec');
-require('./spec/kafka-node-spec.js');
+// Import Specs
+require('./spec/api/message-service-spec');
+require('./spec/api/message-service-ws-spec');
+require('./spec/server/kafka-node-spec.js');
