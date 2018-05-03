@@ -16,4 +16,4 @@ global.io = io;
 // Import Specs
 require('./spec/api/message-service-spec');
 require('./spec/api/message-service-ws-spec');
-require('./spec/server/kafka-node-spec.js');
+require('./spec/api/kafka-client-spec.js');
