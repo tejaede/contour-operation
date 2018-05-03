@@ -2,10 +2,7 @@ version: '2'
 services:
   message-service:
     container_name: message-service
-    links:
-      - "db-service"
-      - "zookeeper-service"
-      - "kafka-service"
+    image: message-service:develop-SNAPSHOT
     # Exposed port
     ports:
       - "8080:8080"
@@ -17,54 +14,21 @@ services:
     volumes:
       - ./:/usr/src/app/:ro
 
-  zookeeper-service:
-    container_name: zookeeper-service
-    image: jplock/zookeeper
+  message-service-cli:
+    container_name: message-service
+    image: message-service:develop-SNAPSHOT
     # Exposed port
     ports:
-      - "2181:2181"
+      - "8080:8080"
     networks:
+      - frontend
       - backend
-
-  kafka-service:
-    container_name: kafka-service
-    image: wurstmeister/kafka:latest
-    # Exposed port
-    networks:
-      - backend
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    links:
-      - zookeeper-service:zk
-    environment:
-      KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_ADVERTISED_HOST_NAME}
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper-service:2181
-      KAFKA_LISTENERS: "PLAINTEXT://:9092,SSL://:9093"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${KAFKA_ADVERTISED_HOST_NAME}:9092,SSL://${KAFKA_ADVERTISED_HOST_NAME}:9093"
-      KAFKA_SSL_KEYSTORE_LOCATION: "/var/private/ssl/certs/server.keystore.jks"
-      KAFKA_SSL_KEYSTORE_PASSWORD: "password"
-      KAFKA_SSL_KEY_PASSWORD: "password"
-      KAFKA_SSL_TRUSTSTORE_LOCATION: "/var/private/ssl/certs/server.truststore.jks"
-      KAFKA_SSL_TRUSTSTORE_PASSWORD: "password"
-      KAFKA_CREATE_TOPICS: "DuplicateMessageTest:1:1,RebalanceTopic:3:1,ExampleTopic:1:1,RebalanceTest:1:1"
+    build:
+      context: ./
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./docker/certs:/var/private/ssl/certs
-
-  db-service:
-    container_name: db-service
-    image: postgres:9.4
-    volumes:
-      - db:/var/lib/postgresql/data
-    networks:
-      - backend
-    environment:
-      POSTGRES_PASSWORD: psqlpass
-
-# Data volumes
-volumes:
-  db:
+      - ./:/usr/src/app/:ro
+    entrypoint: ["node"]
+    command: ["cli", "--fetchData", '{ "root": { "prototype": "montage/data/model/data-query", "values": { "criteria": {}, "orderings": [], "prefetchExpressions": null, "typeModule": { "%": "data/descriptors/message.mjson" } } } }']
 
 # Default network
 networks:
