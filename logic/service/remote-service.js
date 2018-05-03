@@ -51,49 +51,11 @@ exports.AbstractRemoteService = {
     // Service Reference
     //
 
-    registerServiceReferences: {
-        value: function (childServices) {
-            var self;
-            if (!this.__childServiceRegistrationPromise) {
-                self = this;
-                this.__childServiceRegistrationPromise = Promise.all(childServices.map(function (child) {
-                    return self.registerServiceReference(child);
-                }));
-            }
-        }
-    },
-
-    registerServiceReference: {
-        value: function (child, types) {
-            var self = this;
-            // possible types
-            // -- types is passed in as an array or a single type.
-            // -- a model is set on the child.
-            // -- types is set on the child.
-            // any type can be asychronous or synchronous.
-                types = types && Array.isArray(types) && types ||
-                        types && [types] ||
-                        child.model && child.model.objectDescriptors ||
-                        child.types && Array.isArray(child.types) && child.types ||
-                        child.types && [child.types] ||
-                        [];
-
-            return self._registerServiceReferenceTypes(child, types);
-        }
-    },
-
-    _registerServiceReferenceTypes: {
-        value: function (child, types) {
-            var self = this;
-            return this._resolveAsynchronousTypes(types).then(function (descriptors) {
-                self._registerTypesByModuleId(descriptors);
-                self._addReferenceService(child, types);
-                return null;
-            });
-        }
-    },
-
     _referenceService: {
+        value: undefined
+    },
+
+    _referenceServicesByType: {
         value: undefined
     },
 
@@ -115,40 +77,77 @@ exports.AbstractRemoteService = {
         }
     },
 
-    _referenceServicesByType: {
-        value: undefined
-    },
-
-    _addReferenceService: {
-        value: function (child, types) {
-            var children, type, i, n, nIfEmpty = 1;
-            types = types || child.model && child.model.objectDescriptors || child.types;
-            
-            // Add the new child to this service's children set.
-            this.referenceService.add(child);
-
-            // Add the new child service to the services array of each of its
-            // types or to the "all types" service array identified by the
-            // `null` type, and add each of the new child's types to the array
-            // of child types if they're not already there.
-
-            for (i = 0, n = types && types.length || nIfEmpty; i < n; i += 1) {
-                type = types && types.length && types[i] || null;
-                children = this.referenceServicesByType.get(type) || [];
-                children.push(child);
-                if (children.length === 1) {
-                    this.referenceServicesByType.set(type, children);
-                }
-            }
-        }
-    },
-
-    _referenceServiceForType: {
+    referenceServiceForType: {
         value: function (type) {
             var services;
             type = type instanceof ObjectDescriptor ? type : this._objectDescriptorForType(type);
             services = this._referenceServicesByType.get(type) || this._referenceServicesByType.get(null);
             return services && services[0] || null;
+        }
+    },
+
+    registerServiceReferences: {
+        value: function (referenceServices) {
+            var self;
+            if (!this.__referenceServiceRegistrationPromise) {
+                self = this;
+                this.__referenceServiceRegistrationPromise = Promise.all(referenceServices.map(function (service) {
+                    return self.registerServiceReference(service);
+                }));
+            }
+        }
+    },
+
+    registerServiceReference: {
+        value: function (service, types) {
+            var self = this;
+            // possible types
+            // -- types is passed in as an array or a single type.
+            // -- a model is set on the service.
+            // -- types is set on the service.
+            // any type can be asychronous or synchronous.
+                types = types && Array.isArray(types) && types ||
+                        types && [types] ||
+                        service.model && service.model.objectDescriptors ||
+                        service.types && Array.isArray(service.types) && service.types ||
+                        service.types && [service.types] ||
+                        [];
+
+            return self._registerServiceReferenceTypes(service, types);
+        }
+    },
+
+    _registerServiceReferenceTypes: {
+        value: function (service, types) {
+            var self = this;
+            return this._resolveAsynchronousTypes(types).then(function (descriptors) {
+                self._registerTypesByModuleId(descriptors);
+                self._addReferenceService(service, types);
+                return null;
+            });
+        }
+    },
+
+    _addReferenceService: {
+        value: function (service, types) {
+            var serviceren, type, i, n, nIfEmpty = 1;
+            types = types || service.model && service.model.objectDescriptors || service.types;
+            
+            // Add the new service to this service's serviceren set.
+            this.referenceService.add(service);
+
+            // Add the new service service to the services array of each of its
+            // types or to the "all types" service array identified by the
+            // `null` type, and add each of the new service's types to the array
+            // of service types if they're not already there.
+            for (i = 0, n = types && types.length || nIfEmpty; i < n; i += 1) {
+                type = types && types.length && types[i] || null;
+                serviceren = this.referenceServicesByType.get(type) || [];
+                serviceren.push(service);
+                if (serviceren.length === 1) {
+                    this.referenceServicesByType.set(type, serviceren);
+                }
+            }
         }
     },
 
@@ -168,7 +167,7 @@ exports.AbstractRemoteService = {
             var self = this,
                 action = 'fetchData',
                 query = stream.query,
-                service = self._referenceServiceForType(query.type);
+                service = self.referenceServiceForType(query.type);
 
             return self._serialize(service).then(function (serviceJSON) {
                 return self._serialize(query).then(function (queryJSON) {
@@ -189,7 +188,7 @@ exports.AbstractRemoteService = {
             var self = this,
                 action = 'saveDataObject',
                 type = self.objectDescriptorForObject(object),
-                service = self._referenceServiceForType(type);
+                service = self.referenceServiceForType(type);
                 
             return self._serialize(service).then(function (serviceJSON) {
                 return self._serialize(object).then(function (dataObjectJSON) {
@@ -209,7 +208,7 @@ exports.AbstractRemoteService = {
             var self = this,
                 action = 'deleteDataObject',
                 type = self.objectDescriptorForObject(object),
-                service = self._referenceServiceForType(type);
+                service = self.referenceServiceForType(type);
 
             return self._serialize(service).then(function (serviceJSON) {
                 return self._serialize(object).then(function (dataObjectJSON) {

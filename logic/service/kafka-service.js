@@ -87,10 +87,13 @@ consumer.on('offsetOutOfRange', function (topic) {
  * @class
  * @extends external:HttpService
  */
-exports.HttpServerService = HttpService.specialize(/** @lends MessageService.prototype */ {
+exports.KafkaService = HttpService.specialize(/** @lends MessageService.prototype */ {
 
     constructor: {
-        value: function HttpServerService() {
+        value: function KafkaService() {
+
+
+
 
         }
     }

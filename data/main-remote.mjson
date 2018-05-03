@@ -4,11 +4,11 @@
         "values": {
             "name": "DataService",
             "childServices": [
-                {"@": "messageService"}
+                {"@": "remoteService"}
             ]
         }
     },
-    "messageService": {
+    "remoteService": {
         "object": "data/remote-service.mjson"
     }
 }

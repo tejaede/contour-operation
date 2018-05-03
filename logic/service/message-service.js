@@ -1,7 +1,27 @@
 var HttpService = require("montage/data/service/http-service").HttpService,
     Promise = require("montage/core/promise").Promise;
+    
+function ObjectToMap(obj) {
+    const map = new Map();
+    Object.keys(obj).forEach(function(key) {
+        map.set(key, obj[key]);
+    });
+    return map;
+}
 
-var STORE = Map.from({
+function MapToArray(array) {
+    return Array.from(STORE, function(key, value) {
+        return  value;   
+    });
+}
+
+function MaxMapItemPropertyValue(array, prop) {
+    return MapToArray(array).reduce(function (prev, curr) {
+        return curr ? Math.max(prev[prop], curr[prop]) : prev[prop];
+    })[prop];
+}
+
+var STORE = ObjectToMap({
     42: {
         "id": 42,
         "subject": "You've got mail",
@@ -10,7 +30,7 @@ var STORE = Map.from({
     }
 });
 
-var AUTO_INCREMENT_ID = 43;
+var AUTO_INCREMENT_ID = MaxMapItemPropertyValue(STORE, 'id');
 
 var dataStore = {
     all: function () {
