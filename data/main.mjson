@@ -1,0 +1,14 @@
+{
+    "root": {
+        "prototype": "montage/data/service/data-service",
+        "values": {
+            "name": "DataService",
+            "childServices": [
+                {"@": "contourService"}
+            ]
+        }
+    },
+    "contourService": {
+        "object": "data/contour-service.mjson"
+    }
+}

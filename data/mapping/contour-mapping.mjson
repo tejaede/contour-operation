@@ -1,0 +1,24 @@
+{
+    "root": {
+        "prototype": "montage/data/service/expression-data-mapping",
+        "values": {
+            "rawDataPrimaryKeys":["id"],
+            "objectDescriptor": {"@": "ContourObjectDescriptor"},
+            "objectMapping": {
+                "rules": {
+                    "id": {"<->": "id"},
+                    "subject": {"<->": "subject"},
+                    "text": {"<->": "text"},
+                    "updated": {"<->": "updated"},
+                    "created": {"<->": "created"}
+                }
+            },
+            "requisitePropertyNames": [
+                "id", "subject", "text", "updated", "created"
+            ]
+        }
+    },
+    "ContourObjectDescriptor": {
+        "object": "data/descriptors/contour.mjson"
+    }
+}

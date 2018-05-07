@@ -1,0 +1,20 @@
+{
+    "Contour": {
+        "object": "data/descriptors/contour.mjson"
+    },
+    "ContourMapping": {
+        "object": "data/mapping/contour-mapping.mjson"
+    },
+    "root": {
+        "prototype": "logic/service/contour-service",
+        "values": {
+            "name": "ContourService",
+            "types": [
+                 {"@": "Contour"}
+            ],
+            "mappings": [
+                 {"@": "ContourMapping"}
+            ]
+        }
+    }
+}

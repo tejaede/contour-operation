@@ -1,0 +1,28 @@
+{
+    "Contour": {
+        "object": "data/descriptors/contour.mjson"
+    },
+    "ContourMapping": {
+        "object": "data/mapping/contour-mapping.mjson"
+    },
+    "root": {
+        "prototype": "logic/service/remote-service",
+        "values": {
+            "name": "HttpRemoteService",
+            "types": [
+                 {"@": "Contour"}
+            ],
+            "mappings": [
+                 {"@": "ContourMapping"}
+            ],
+            "serviceReferences": [
+                 {
+                    "module": {"%": "data/contour-service.mjson"}, 
+                    "types": [
+                         {"@": "Contour"}
+                    ]
+                 }
+            ]
+        }
+    }
+}

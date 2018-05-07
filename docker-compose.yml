@@ -1,0 +1,33 @@
+version: '2'
+services:
+  contour-service:
+    container_name: contour-service
+    image: contour-service:develop-SNAPSHOT
+    # Exposed port
+    ports:
+      - "8080:8080"
+    networks:
+      - frontend
+      - backend
+    build:
+      context: ./
+    volumes:
+      - ./:/usr/src/app/:ro
+
+  contour-service-cli:
+    container_name: contour-service-cli
+    image: contour-service:develop-SNAPSHOT
+    networks:
+      - frontend
+      - backend
+    build:
+      context: ./
+    volumes:
+      - ./:/usr/src/app/:ro
+    entrypoint: ["node"]
+    command: ["cli", "--fetchData", '{ "root": { "prototype": "montage/data/model/data-query", "values": { "criteria": {}, "orderings": [], "prefetchExpressions": null, "typeModule": { "%": "data/descriptors/contour.mjson" } } } }']
+
+# Default network
+networks:
+  frontend:
+  backend:
