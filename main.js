@@ -91,19 +91,6 @@ getMainService().then(function () {
     console.log("MainService Ready!");  
 });
 
-// Perform fetchData operation
-exports.fetchData = function (query) {
-    // Decode operation prior to get main service
-    return getOperationFromData(query).then(function (dataQuery) {
-        // Disptach Operation on main service
-        return getMainService().then(function (mainService) {
-            //console.log('mainService.fetchData', dataQuery);
-            return mainService.handleOperation(dataQuery).then(function (queryResult) {
-                return getDataOperationResponse(queryResult);
-            });
-        });
-    });
-};
 
 // Perform fetchData operation
 exports.handleOperation = function (operation) {
@@ -120,6 +107,21 @@ exports.handleOperation = function (operation) {
     });
 };
 
+
+// Perform fetchData operation
+exports.fetchData = function (query) {
+    // Decode operation prior to get main service
+    return getOperationFromData(query).then(function (dataQuery) {
+        // Disptach Operation on main service
+        return getMainService().then(function (mainService) {
+            //console.log('mainService.fetchData', dataQuery);
+            return mainService.fetchData(dataQuery).then(function (queryResult) {
+                return getDataOperationResponse(queryResult);
+            });
+        });
+    });
+};
+
 // Perform deleteDataObject operation
 exports.deleteDataObject = function (data) {
     // Decode operation prior to get main service
@@ -127,7 +129,7 @@ exports.deleteDataObject = function (data) {
         // Disptach Operation on main service
         return getMainService().then(function (mainService) {
             //console.log('mainService.deleteDataObject', dataObject);
-            return mainService.handleOperation(dataObject).then(function (result) {
+            return mainService.deleteDataObject(dataObject).then(function (result) {
                 return getDataOperationResponse(dataObject);
             });
         });
@@ -141,7 +143,7 @@ exports.saveDataObject = function (data) {
         // Disptach Operation on main service
         return getMainService().then(function (mainService) {
             //console.log('mainService.saveDataObject', dataObject);
-            return mainService.handleOperation(dataObject).then(function (result) {
+            return mainService.saveDataObject(dataObject).then(function (result) {
                 return getDataOperationResponse(dataObject);
             });
         });
