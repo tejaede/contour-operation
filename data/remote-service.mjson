@@ -25,7 +25,7 @@
             ],
             "serviceReferences": [
                  {
-                    "module": {"%": "logic/service/message-service.mjson"}, 
+                    "module": {"%": "data/message-service.mjson"}, 
                     "types": [
                          {"@": "Message"},
                          {"@": "Person"}
