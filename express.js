@@ -12,8 +12,7 @@ var compression = require('compression');
 
 const APP_PUBLIC_PATH = process.env.APP_PUBLIC_PATH || __dirname;
 const APP_HOSTNAME = process.env.APP_HOSTNAME || 'localhost';
-const APP_PORT = process.env.APP_PORT || '8080';
-
+const APP_PORT = process.env.APP_PORT || '8081';
 
 // Log uncaughtException and graceful shutdown once
 var uncaughtedException;
@@ -37,7 +36,6 @@ if (process.env.NODE_ENV !== 'test') {
 app.use(cors()); // support cross-origin
 app.use(bodyParser.json()); // support json encoded body
 app.use(bodyParser.urlencoded({extended: true})); // support encoded body
-
 
 // Should be placed before express.static
 // To ensure that all assets and data are compressed (utilize bandwidth)
@@ -66,10 +64,22 @@ function resultToHttpResponse(response, event, result) {
     response.json(result);
 }
 
+app.route("/api/operation")
+    .post(function (req, res, next) {
+
+        // GET query
+        // main.fetchData(req.query.query).then(function (result) {
+        main.handleOperation(req.body.operation).then(function (result) {
+          resultToHttpResponse(res, 'fetchData', result);
+        }).catch(next);
+    });
+
 app.route("/api/data")
     .get(function (req, res, next) {
+
         // GET query
-        main.fetchData(req.query.query).then(function (result) {
+        // main.fetchData(req.query.query).then(function (result) {
+        main.fetchData(req.query.operation).then(function (result) {
           resultToHttpResponse(res, 'fetchData', result);
         }).catch(next);
     });

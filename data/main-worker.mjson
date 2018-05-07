@@ -1,0 +1,8 @@
+{
+    "root": {
+        "prototype": "montage/data/service/raw-data-worker",
+        "values": {
+            "name": "RawDataWorker"
+        }
+    }
+}

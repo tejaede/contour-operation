@@ -2,6 +2,8 @@ var Montage = require("montage").Montage,
     HttpService = require("montage/data/service/http-service").HttpService,
     ObjectDescriptor = require("montage/core/meta/object-descriptor").ObjectDescriptor,
     RawDataService = require("montage/data/service/raw-data-service").RawDataService,
+    DataOperation = require("montage/data/service/data-operation").DataOperation,
+    RawDataOperation = require("montage/data/service/raw-data-operation").RawDataOperation,
     Promise = require("montage/core/promise").Promise;
 
 var serialize = require("montage/core/serialization/serializer/montage-serializer").serialize;
@@ -165,18 +167,20 @@ exports.AbstractRemoteService = {
     fetchRawData: {
         value: function (stream) {
             var self = this,
-                action = 'fetchData',
                 query = stream.query,
-                service = self.referenceServiceForType(query.type);
+                service = self.referenceServiceForType(query.type),
+                operation = new RawDataOperation();
+            
+            operation.serviceModule = service.module;
+            operation.objectDescriptorModule = query.type.objectDescriptorInstanceModule;
+            operation.data = query.criteria;
+            operation.type = DataOperation.Type.READ;
 
-            return self._serialize(service).then(function (serviceJSON) {
-                return self._serialize(query).then(function (queryJSON) {
-                    return self._performOperation(action, queryJSON, serviceJSON).then(function (remoteDataJson) {
-                        return self._deserialize(remoteDataJson).then(function (remoteData) {
-                            stream.addData(remoteData);
-                            stream.dataDone();
-                        });
-                    }); 
+
+            return self._performOperation(operation).then(function (remoteDataJson) {
+                return self._deserialize(remoteDataJson).then(function (remoteData) {
+                    stream.addData(remoteData);
+                    stream.dataDone();
                 });
             }); 
         }
@@ -186,18 +190,18 @@ exports.AbstractRemoteService = {
     saveRawData: {
         value: function (rawData, object) {
             var self = this,
-                action = 'saveDataObject',
                 type = self.objectDescriptorForObject(object),
-                service = self.referenceServiceForType(type);
-                
-            return self._serialize(service).then(function (serviceJSON) {
-                return self._serialize(object).then(function (dataObjectJSON) {
-                    return self._performOperation(action, dataObjectJSON, serviceJSON).then(function (remoteObjectJSON) {
-                        return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
-                            return self._mapRawDataToObject(remoteObject, object);
-                        });
-                    });
-                }); 
+                service = self.referenceServiceForType(type),
+                operation = new RawDataOperation();
+        
+            operation.serviceModule = service.module;
+            operation.objectDescriptorModule = type.objectDescriptorInstanceModule;
+            operation.data = rawData;
+            operation.type = this.rootService.createdDataObjects.has(object) ? DataOperation.Type.CREATE : DataOperation.Type.UPDATE;
+            return self._performOperation(operation).then(function (remoteObjectJSON) {
+                return self._deserialize(remoteObjectJSON).then(function (remoteObject) {
+                    return self._mapRawDataToObject(remoteObject, object);
+                });
             });
         }
     },
@@ -206,15 +210,16 @@ exports.AbstractRemoteService = {
     deleteRawData: {
         value: function (rawData, object) {
             var self = this,
-                action = 'deleteDataObject',
                 type = self.objectDescriptorForObject(object),
-                service = self.referenceServiceForType(type);
+                service = self.referenceServiceForType(type),
+                operation = new RawDataOperation();
 
-            return self._serialize(service).then(function (serviceJSON) {
-                return self._serialize(object).then(function (dataObjectJSON) {
-                    return self._performOperation(action, dataObjectJSON, serviceJSON);
-                }); 
-            });
+            operation.serviceModule = service.module;
+            operation.objectDescriptorModule = type.objectDescriptorInstanceModule;
+            operation.data = rawData;
+            operation.type = DataOperation.Type.DELETE;
+
+            return self._performOperation(operation);
         }
     }
 };
@@ -228,15 +233,7 @@ exports.AbstractRemoteService = {
 exports.HttpRemoteService = HttpService.specialize(exports.AbstractRemoteService).specialize(/** @lends RemoteService.prototype */ {
 
     _baseUrl: {
-        value: '/api/data'
-    },
-
-    _actionsToPaths: {
-        value: {
-            'fetchData': '',
-            'saveDataObject': '/save',
-            'deleteDataObject': '/delete'
-        }
+        value: '/api/operation'
     },
 
     constructor: {
@@ -246,31 +243,22 @@ exports.HttpRemoteService = HttpService.specialize(exports.AbstractRemoteService
     },
 
     _performOperation: {
-        value: function (action, data, service) {
+        value: function (operation) {
             var body, url, headers, 
                 self = this;
-
-            if (!self._actionsToPaths.hasOwnProperty(action)) {
-                return Promise.reject('Invalid action "' + action + '"');
-            } else if (!data) {
-                return Promise.reject('Missing or invalid data');
-            }
             
-            url = self._baseUrl + self._actionsToPaths[action];
+            url = self._baseUrl;
 
-            if (action !== 'fetchData') {
-                headers = {
-                    "Content-Type": "application/json"
-                };
+            headers = {
+                "Content-Type": "application/json"
+            };
+
+            return self._serialize(operation).then(function (operationJSON) {
                 body = JSON.stringify({
-                    data: data,
-                    service: service
+                    operation: operationJSON
                 });
-            } else {
-                url += '?query=' + encodeURIComponent(data) + '&service=' + encodeURIComponent(service);
-            }   
-
-            return self.fetchHttpRawData(url, headers, body, false);
+                return self.fetchHttpRawData(url, headers, body, false);
+            });
         }  
     } 
 });
