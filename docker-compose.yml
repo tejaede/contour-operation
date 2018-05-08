@@ -6,7 +6,7 @@ services:
     container_name: message-service
     image: message-service:develop-SNAPSHOT
     environment:
-    #  APP_MAIN: 'data/main-data-coordinator.mjson'
+      APP_MAIN: 'data/main-data-coordinator.mjson'
     # Exposed port
     ports:
       - "8080:8080"
@@ -19,30 +19,26 @@ services:
       - ./:/usr/src/app/:ro
 
   # DataWorker
-  message-data-service-cli:
-    container_name: message-service-cli
+  data-service-cli:
+    container_name: message-data-service-cli
     image: message-service:develop-SNAPSHOT
     environment:
       APP_MAIN: 'data/main-data-worker.mjson'
     networks:
       - frontend
       - backend
-    build:
-      context: ./
     volumes:
       - ./:/usr/src/app/:ro
 
   # RawDataWorker
-  message-raw-data-service-cli:
-    container_name: message-service-cli
+  raw-data-service-cli:
+    container_name: message-raw-data-service-cli
     image: message-service:develop-SNAPSHOT
     environment:
       APP_MAIN: 'data/main-raw-data-worker.mjson'
     networks:
       - frontend
       - backend
-    build:
-      context: ./
     volumes:
       - ./:/usr/src/app/:ro
 
@@ -53,8 +49,6 @@ services:
     networks:
       - frontend
       - backend
-    build:
-      context: ./
     volumes:
       - ./:/usr/src/app/:ro
     entrypoint: ["node"]
