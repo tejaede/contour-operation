@@ -16,6 +16,8 @@
         "values": {
             "name": "HttpRemoteService",
             "types": [
+                 {"@": "Message"},
+                 {"@": "Person"}
             ],
             "mappings": [
                  {"@": "MessageMapping"},

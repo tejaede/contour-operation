@@ -6,6 +6,7 @@ var Montage = require('montage');
 
 const PATH = require("path");
 const APP_PATH = process.env.APP_PATH || PATH.join(__dirname, ".");
+const APP_MAIN = process.env.APP_MAIN || 'data/main.mjson';
 
 // Get montage requie instance
 var montageRequire;
@@ -23,7 +24,7 @@ function getMainService() {
     return mainService ? mainService : (mainService = getMontageRequire().then(function (mr) {
         return mr.async('montage/core/serialization/deserializer/montage-deserializer').then(function (module) {
             var Deserializer = module.MontageDeserializer;
-            return mr.async('data/main.mjson').then(function (descriptor) {
+            return mr.async(APP_MAIN).then(function (descriptor) {
                 var deserializer = new Deserializer().init(descriptor, mr);
                 return deserializer.deserializeObject();
             }); 

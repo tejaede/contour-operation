@@ -64,6 +64,7 @@
     "doc": "concurrently \"npm run serve:doc\" \"npm run open:doc\"",
     "start:node": "npm run serve",
     "serve": "node index",
+    "serve:dev": "APP_PORT=3000 node .",
     "serve:test": "http-server -p 8081 .",
     "serve:doc": "http-server -p 8082 doc",
     "open:app": "open http://localhost:8080",
