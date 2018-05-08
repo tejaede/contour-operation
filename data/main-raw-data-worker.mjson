@@ -1,0 +1,18 @@
+{
+    "root": {
+        "prototype": "montage/data/service/data-service",
+        "values": {
+            "name": "DataService",
+            "childServices": [
+                {"@": "kafkaService"},
+                {"@": "messageService"}
+            ]
+        }
+    },
+    "kafkaService": {
+        "object": "data/kafka-service.mjson"
+    },
+    "messageService": {
+        "object": "data/message-service.mjson"
+    }
+}

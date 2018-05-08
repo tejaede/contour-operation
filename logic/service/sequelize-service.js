@@ -47,7 +47,7 @@ exports.HttpServerService = HttpService.specialize(/** @lends MessageService.pro
 
     constructor: {
         value: function HttpServerService() {
-
+          // TODO convert expression to SQL queries upon operations
         }
     }
 });

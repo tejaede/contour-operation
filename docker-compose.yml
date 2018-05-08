@@ -1,8 +1,12 @@
 version: '2'
 services:
+
+  # RemoteServerService or RemoteOperationCoordinator if enabled
   message-service:
     container_name: message-service
     image: message-service:develop-SNAPSHOT
+    environment:
+    #  APP_MAIN: 'data/main-data-coordinator.mjson'
     # Exposed port
     ports:
       - "8080:8080"
@@ -14,7 +18,36 @@ services:
     volumes:
       - ./:/usr/src/app/:ro
 
-  message-service-cli:
+  # DataWorker
+  message-data-service-cli:
+    container_name: message-service-cli
+    image: message-service:develop-SNAPSHOT
+    environment:
+      APP_MAIN: 'data/main-data-worker.mjson'
+    networks:
+      - frontend
+      - backend
+    build:
+      context: ./
+    volumes:
+      - ./:/usr/src/app/:ro
+
+  # RawDataWorker
+  message-raw-data-service-cli:
+    container_name: message-service-cli
+    image: message-service:develop-SNAPSHOT
+    environment:
+      APP_MAIN: 'data/main-raw-data-worker.mjson'
+    networks:
+      - frontend
+      - backend
+    build:
+      context: ./
+    volumes:
+      - ./:/usr/src/app/:ro
+
+  # ScheduledWorker
+  message-cli:
     container_name: message-service-cli
     image: message-service:develop-SNAPSHOT
     networks:
@@ -26,6 +59,8 @@ services:
       - ./:/usr/src/app/:ro
     entrypoint: ["node"]
     command: ["cli", "--fetchData", '{ "root": { "prototype": "montage/data/model/data-query", "values": { "criteria": {}, "orderings": [], "prefetchExpressions": null, "typeModule": { "%": "data/descriptors/message.mjson" } } } }']
+   
+
 
 # Default network
 networks:
