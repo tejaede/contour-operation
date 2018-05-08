@@ -10,9 +10,9 @@
         }
     },
     "kafkaService": {
-        "object": "data/kafka-service.mjson"
+        "object": "data/services/kafka-service.mjson"
     },
     "sequelizeService": {
-        "object": "data/sequelize-service.mjson"
+        "object": "data/services/sequelize-service.mjson"
     }
 }

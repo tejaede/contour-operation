@@ -9,6 +9,6 @@
         }
     },
     "remoteService": {
-        "object": "data/remote-service.mjson"
+        "object": "data/services/remote-service.mjson"
     }
 }

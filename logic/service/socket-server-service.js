@@ -2,12 +2,12 @@ var RawDataService = require("montage/data/service/raw-data-service").RawDataSer
     Promise = require("montage/core/promise").Promise;
 
 /**
- * Provides Http to MainService
+ * Provides Socket to MainService
  *
  * @class
  * @extends external:RawDataService
  */
-exports.HttpServerService = RawDataService.specialize(/** @lends HttpServerService.prototype */ {
+exports.SocketServerService = RawDataService.specialize(/** @lends SocketServerService.prototype */ {
 
     constructor: {
         value: function HttpServerService() {
