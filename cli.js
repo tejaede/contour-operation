@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Example:
-// node cli.js --fetchData '{ "root": { "prototype": "montage/data/model/data-query", "values": { "criteria": {}, "orderings": [], "prefetchExpressions": null, "typeModule": { "%": "data/descriptors/{{name}}.mjson" } } } }'
+// node cli.js --fetchData '{ "root": { "prototype": "montage/data/model/data-query", "values": { "criteria": {}, "orderings": [], "prefetchExpressions": null, "typeModule": { "%": "data/descriptors/message.mjson" } } } }'
 var program = require('commander');
  
 var package = require('./package.json');

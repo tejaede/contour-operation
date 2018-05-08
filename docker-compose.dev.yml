@@ -43,3 +43,8 @@ services:
     environment:
       ZK_HOSTS: "zk:2181"
       #APPLICATION_SECRET: letmein
+
+# Default network
+networks:
+  frontend:
+  backend:

@@ -19,10 +19,10 @@ if [ -z "$TRAVIS" ]; then
     docker-compose down
 
     if [ -z "$KAFKA_VERSION" ]; then
-      docker-compose up -d
+      docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose-postgresql.yml -f docker-compose-kafka.yml up -d
     else
       echo "Using Kafka Version: $KAFKA_VERSION"
-      docker-compose -f docker-compose.yml -f docker/docker-compose.${KAFKA_VERSION}.yml up -d
+      docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose-postgresql.yml -f docker-compose-kafka.yml -f docker/docker-compose.${KAFKA_VERSION}.yml up -d
     fi
 else
     DOCKER_VM_IP='127.0.0.1'

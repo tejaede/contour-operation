@@ -28,4 +28,4 @@ USER nobody
 EXPOSE 8080 8443 5001
 
 ENTRYPOINT ["node"]
-CMD ["./server"]
+CMD ["."]

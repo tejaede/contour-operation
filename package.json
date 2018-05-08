@@ -18,6 +18,7 @@
     "config": "^1.30.0",
     "cors": "^2.8.4",
     "express": "^4.16.3",
+    "istanbul": "^0.4.5",
     "joey": "^1.5.3",
     "kafka-node": "^2.5.0",
     "montage": "montagejs/montage#tej/data-query-serialization",
@@ -71,9 +72,8 @@
     "open:pghero": "open http://localhost:5001",
     "open:pgadmin": "open http://localhost:5002",
     "open:kfma-manager": "open http://localhost:5003",
-    "start:docker": "npm run start:compose",
-    "stop:docker": "npm run stop:compose",
     "start:docker": "docker run -p 8080:8080 message-service:develop-SNAPSHOT",
+    "stop:docker": "npm run stop:compose",
     "start:swarm": "docker swarm init",
     "start:stack": "docker stack deploy -c docker-compose.yml 'message-stack'",
     "stop:stack": "docker stack rm 'message-stack'",
@@ -81,7 +81,8 @@
     "build": "npm run build:compose",
     "build:docker": "docker build . -t message-service:develop-SNAPSHOT",
     "build:compose": "docker-compose build",
-    "start:compose": "./start-docker.sh",
+    "start:composed": "./start-docker.sh",
+    "start:compose": "docker-compose up",
     "stop:compose": "docker-compose down"
   }
 }

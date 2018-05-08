@@ -15,11 +15,8 @@ services:
       - ./:/usr/src/app/:ro
 
   message-service-cli:
-    container_name: message-service
+    container_name: message-service-cli
     image: message-service:develop-SNAPSHOT
-    # Exposed port
-    ports:
-      - "8080:8080"
     networks:
       - frontend
       - backend
