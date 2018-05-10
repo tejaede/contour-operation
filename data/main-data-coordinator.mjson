@@ -11,12 +11,12 @@
         }
     },
     "kafkaService": {
-        "object": "data/services/kafka-service.mjson"
+        "object": "data/service/kafka-service.mjson"
     },
     "HttpServerService": {
-        "object": "data/services/http-server-service.mjson"
+        "object": "data/service/http-server-service.mjson"
     },
     "SocketServerService": {
-        "object": "data/services/socket-server-service.mjson"
+        "object": "data/service/socket-server-service.mjson"
     }
 }

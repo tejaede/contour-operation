@@ -10,9 +10,9 @@
         }
     },
     "kafkaService": {
-        "object": "data/services/kafka-service.mjson"
+        "object": "data/service/kafka-service.mjson"
     },
     "messageService": {
-        "object": "data/services/message-service.mjson"
+        "object": "data/service/message-service.mjson"
     }
 }
