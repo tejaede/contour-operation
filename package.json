@@ -11,6 +11,9 @@
   "bin": {
     "message": "cli.js"
   },
+  "engines": {
+    "node": ">=4.x.x"
+  },
   "dependencies": {
     "body-parser": "^1.18.2",
     "commander": "^2.15.1",
@@ -23,6 +26,7 @@
     "kafka-node": "^2.5.0",
     "montage": "montagejs/montage#tej/data-query-serialization",
     "morgan": "^1.9.0",
+    "semver": "^5.5.0",
     "sequelize": "^4.37.6",
     "socket.io": "^2.1.0",
     "socket.io-client": "^2.1.0"
