@@ -8,7 +8,7 @@ importScripts('./../node_modules/socket.io-client/dist/socket.io.js');
 // Configure Test ENV
 chai.use(chaiHttp);
 // Export Global
-global = eval("this");
+global = eval("this"); // jshint ignore:line
 global.chai = chai;
 global.should = chai.should();
 global.expect = chai.expect;

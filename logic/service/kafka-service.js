@@ -135,9 +135,10 @@ exports.KafkaService = RawDataService.specialize( /** @lends KafkaService.protot
 
                 // Cast type to montage object serailization
                 // TODO check with Thomas
-                type = typeof type === 'string' ? type : type.type,
-                    service = typeof service === 'string' ? service : service.root.prototype;
-                resolve(type + service.root.prototype);
+                type = (typeof type === 'string' ? type : type.type);
+                    service = (typeof service === 'string' ? service : service.root.prototype);
+
+                resolve(type + service);
             });
         }
     },
