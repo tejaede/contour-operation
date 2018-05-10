@@ -1,4 +1,4 @@
-var HttpService = require("montage/data/service/http-service").HttpService,
+var ObjectDescriptor = require("montage/core/meta/object-descriptor").ObjectDescriptor, 
     Promise = require("montage/core/promise").Promise;
 
 /*
@@ -43,10 +43,10 @@ sequelize.sync()
  * @class
  * @extends external:HttpService
  */
-exports.HttpServerService = HttpService.specialize(/** @lends MessageService.prototype */ {
+exports.SequelizeService = RawDataService.specialize(/** @lends MessageService.prototype */ {
 
     constructor: {
-        value: function HttpServerService() {
+        value: function SequelizeService() {
           // TODO convert expression to SQL queries upon operations
         }
     }

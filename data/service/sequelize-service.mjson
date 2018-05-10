@@ -1,0 +1,8 @@
+{
+    "root": {
+        "prototype": "logic/service/sequelize-service",
+        "values": {
+            "name": "SequelizeService"
+        }
+    }
+}
