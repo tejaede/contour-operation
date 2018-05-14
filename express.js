@@ -64,10 +64,22 @@ function resultToHttpResponse(response, event, result) {
     response.json(result);
 }
 
+app.route("/api/operation")
+    .post(function (req, res, next) {
+
+        // GET query
+        // main.fetchData(req.query.query).then(function (result) {
+        main.handleOperation(req.body.operation).then(function (result) {
+          resultToHttpResponse(res, 'fetchData', result);
+        }).catch(next);
+    });
+
 app.route("/api/data")
     .get(function (req, res, next) {
+
         // GET query
-        main.fetchData(req.query.query).then(function (result) {
+        // main.fetchData(req.query.query).then(function (result) {
+        main.fetchData(req.query.operation).then(function (result) {
           resultToHttpResponse(res, 'fetchData', result);
         }).catch(next);
     });

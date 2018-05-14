@@ -92,6 +92,23 @@ getMainService().then(function () {
     console.log("MainService Ready!");  
 });
 
+
+// Perform fetchData operation
+exports.handleOperation = function (operation) {
+    
+    // Decode operation prior to get main service
+    return getOperationFromData(operation).then(function (operation) {
+        // Disptach Operation on main service
+        return getMainService().then(function (mainService) {
+            //console.log('mainService.fetchData', dataQuery);
+            return mainService.handleOperation(operation).then(function (queryResult) {
+                return getDataOperationResponse(queryResult);
+            });
+        });
+    });
+};
+
+
 // Perform fetchData operation
 exports.fetchData = function (query) {
     // Decode operation prior to get main service
