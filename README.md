@@ -11,8 +11,8 @@
 
 1. Install 
 ```
-git clone git@github.com:user/repo.git
-cd repo
+git clone -b develop git@github.com:montagestudio/montage-data-stack.git
+cd montage-data-stack
 npm install
 ```
 
@@ -69,6 +69,7 @@ See swagger Documentation: [swagger.yml](./doc/swagger.yml).
 ### Npm commands
  
  - `lint`: jshint . 
+ - `start:node`: node . 
  - `start:docker`: ./start-docker.sh
  - `start:node`: node index.js 
  - `test`: mocha test --timeout 10000 --exit 
@@ -90,9 +91,12 @@ See swagger Documentation: [swagger.yml](./doc/swagger.yml).
  - `build`: npm run build:docker 
  - `build:docker`: docker build . -t message:develop-SNAPSHOT 
  - `build:compose`: docker-compose build 
- - `start:compose`: docker-compose up -d 
+ - `start:compose`: docker-compose up
  - `stop:compose`: docker-compose down
- - 
+ - `start:composed`: ./start-docker.sh
+ - `stop:composed`: ./stop-docker.sh
+ 
+ 
 ## License
 
 
