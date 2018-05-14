@@ -16,8 +16,11 @@ services:
     build:
       context: ./
     volumes:
-      - ./:/usr/src/app/:ro
-
+      - ./data:/usr/src/app/data:ro
+      - ./logic:/usr/src/app/logix:ro
+      - ./ui:/usr/src/app/ui:ro
+      - ./scripts:/usr/src/app/scripts:ro
+      
   # DataWorker
   data-service-cli:
     container_name: message-data-service-cli
@@ -28,8 +31,11 @@ services:
       - frontend
       - backend
     volumes:
-      - ./:/usr/src/app/:ro
-
+      - ./data:/usr/src/app/data:ro
+      - ./logic:/usr/src/app/logix:ro
+      - ./ui:/usr/src/app/ui:ro
+      - ./scripts:/usr/src/app/scripts:ro
+      
   # RawDataWorker
   raw-data-service-cli:
     container_name: message-raw-data-service-cli
@@ -40,8 +46,11 @@ services:
       - frontend
       - backend
     volumes:
-      - ./:/usr/src/app/:ro
-
+      - ./data:/usr/src/app/data:ro
+      - ./logic:/usr/src/app/logix:ro
+      - ./ui:/usr/src/app/ui:ro
+      - ./scripts:/usr/src/app/scripts:ro
+      
   # ScheduledWorker
   message-cli:
     container_name: message-service-cli
@@ -50,11 +59,12 @@ services:
       - frontend
       - backend
     volumes:
-      - ./:/usr/src/app/:ro
+      - ./data:/usr/src/app/data:ro
+      - ./logic:/usr/src/app/logix:ro
+      - ./ui:/usr/src/app/ui:ro
+      - ./scripts:/usr/src/app/scripts:ro
     entrypoint: ["node"]
     command: ["cli", "--fetchData", '{ "root": { "prototype": "montage/data/model/data-query", "values": { "criteria": {}, "orderings": [], "prefetchExpressions": null, "typeModule": { "%": "data/descriptors/message.mjson" } } } }']
-   
-
 
 # Default network
 networks:
